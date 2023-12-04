@@ -2,6 +2,18 @@
 
 rust wasm hash-suits
 
+## List
+
++ Blake2b512
++ Blake2s256
++ Blake3
++ Md5
++ Murmur3_32
++ Murmur3_x64_128
++ Sha256
++ Sha3_256
++ Sm3
+
 ## Install
 
 ```shell
