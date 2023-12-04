@@ -27,5 +27,7 @@ npm publish
 ## Dependencies
 
 [hashes](https://github.com/RustCrypto/hashes)
+
 [murmur3](https://github.com/stusmall/murmur3)
+
 [BLAKE3](https://github.com/BLAKE3-team/BLAKE3)
