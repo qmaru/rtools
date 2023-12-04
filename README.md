@@ -20,6 +20,10 @@ cd pkg
 npm link
 ```
 
+## Publish
+
+npm publish
+
 ## Dependencies
 
 [hashes](https://github.com/RustCrypto/hashes)
