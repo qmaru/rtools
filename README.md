@@ -1,4 +1,4 @@
-# rpinyin
+# rhash
 
 rust wasm hash-suits
 
