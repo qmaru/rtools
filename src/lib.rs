@@ -3,11 +3,13 @@ use blake3;
 use digest::Digest;
 use md5::Md5;
 use murmur3::{murmur3_32, murmur3_x64_128};
+use pinyin::ToPinyin;
 use sha2::Sha256;
 use sha3::Sha3_256;
 use sm3::Sm3;
+use uuid::Uuid;
 use wasm_bindgen::prelude::*;
-
+use zxcvbn::zxcvbn;
 
 fn generate_hash<D: Digest>(message: &str) -> String {
     let mut hasher = D::new();
@@ -76,6 +78,30 @@ pub fn gen_murmur128(message: &str) -> String {
     let high_string = format!("{:016x}", high);
     let hash_string = format!("{}{}", low_string, high_string);
     hash_string
+}
+
+#[wasm_bindgen]
+pub fn passwd_strength(password: &str) -> u8 {
+    let estimate = zxcvbn(password, &[]).unwrap();
+    estimate.score()
+}
+
+#[wasm_bindgen]
+pub fn han_to_pinyin(hans: &str) -> String {
+    let mut results = String::new();
+    for pinyin in hans.to_pinyin() {
+        if let Some(pinyin) = pinyin {
+            let result = pinyin.plain();
+            results = format!("{}{}", results, result);
+        }
+    }
+    results
+}
+
+#[wasm_bindgen]
+pub fn uuidv4() -> String {
+    let id = Uuid::new_v4();
+    id.to_string()
 }
 
 #[cfg(test)]
@@ -161,5 +187,26 @@ mod tests {
         let result = gen_murmur128("hello world");
         println!("murmur128: {:?}", result);
         assert_eq!("533f6046eb7f610eab97467d60eb63b1", result)
+    }
+
+    #[test]
+    fn passwd_strength_test() {
+        let result = passwd_strength("123456");
+        println!("strength: {:?}", result);
+        assert_eq!(0, result)
+    }
+
+    #[test]
+    fn han_to_pinyin_test() {
+        let result = han_to_pinyin("你好");
+        println!("Pinyin: {:?}", result);
+        assert_eq!("nihao", result)
+    }
+
+    #[test]
+    fn uuid_test() {
+        let result = uuidv4();
+        println!("UUID: {:?}", result);
+        assert_ne!("", result)
     }
 }

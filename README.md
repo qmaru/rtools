@@ -1,6 +1,6 @@
-# rhash
+# rtools
 
-rust wasm hash-suits
+some rust wasm tools
 
 ## List
 
@@ -13,6 +13,9 @@ rust wasm hash-suits
 + Sha256
 + Sha3_256
 + Sm3
++ password strength
++ pinyin
++ uuid
 
 ## Install
 
@@ -43,3 +46,5 @@ npm publish
 [murmur3](https://github.com/stusmall/murmur3)
 
 [BLAKE3](https://github.com/BLAKE3-team/BLAKE3)
+
+[zxcvbn](https://github.com/shssoichiro/zxcvbn-rs)
