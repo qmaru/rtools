@@ -350,7 +350,7 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "rtools"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "blake2",
  "blake3",
