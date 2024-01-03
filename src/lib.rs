@@ -65,26 +65,38 @@ pub fn gen_blake3(message: &str) -> String {
 #[wasm_bindgen]
 pub fn gen_murmur32(message: &str) -> String {
     let mut input_reader = message.as_bytes();
-    let hash_result = murmur3_32(&mut input_reader, 0).unwrap();
-    hash_result.to_string()
+    let hash_result = murmur3_32(&mut input_reader, 0);
+    match hash_result {
+        Ok(result) => result.to_string(),
+        Err(_) => String::new(),
+    }
 }
 
 #[wasm_bindgen]
 pub fn gen_murmur128(message: &str) -> String {
     let mut input_reader = message.as_bytes();
-    let hash_result = murmur3_x64_128(&mut input_reader, 0).unwrap();
-    let low: u64 = hash_result as u64;
-    let high: u64 = (hash_result >> 64) as u64;
-    let low_string = format!("{:016x}", low);
-    let high_string = format!("{:016x}", high);
-    let hash_string = format!("{}{}", low_string, high_string);
-    hash_string
+    let hash_result = murmur3_x64_128(&mut input_reader, 0);
+
+    match hash_result {
+        Ok(result) => {
+            let low: u64 = result as u64;
+            let high: u64 = (result >> 64) as u64;
+            let low_string = format!("{:016x}", low);
+            let high_string = format!("{:016x}", high);
+            let hash_string = format!("{}{}", low_string, high_string);
+            hash_string
+        }
+        Err(_) => String::new(),
+    }
 }
 
 #[wasm_bindgen]
-pub fn passwd_strength(password: &str) -> u8 {
-    let estimate = zxcvbn(password, &[]).unwrap();
-    estimate.score()
+pub fn passwd_strength(password: &str) -> String {
+    let estimate = zxcvbn(password, &[]);
+    match estimate {
+        Ok(result) => result.score().to_string(),
+        Err(_) => String::new(),
+    }
 }
 
 #[wasm_bindgen]
@@ -204,7 +216,7 @@ mod tests {
     fn passwd_strength_test() {
         let result = passwd_strength("123456");
         println!("strength: {:?}", result);
-        assert_eq!(0, result)
+        assert_eq!("", result)
     }
 
     #[test]
