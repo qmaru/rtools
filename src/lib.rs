@@ -1,3 +1,4 @@
+use base64_light::{base64_decode_str, base64_encode};
 use blake2::{Blake2b512, Blake2s256};
 use blake3;
 use digest::Digest;
@@ -104,6 +105,16 @@ pub fn uuidv4() -> String {
     id.to_string()
 }
 
+#[wasm_bindgen]
+pub fn b64encode(content: &str) -> String {
+    base64_encode(content)
+}
+
+#[wasm_bindgen]
+pub fn b64decode(content: &str) -> String {
+    base64_decode_str(content)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -208,5 +219,19 @@ mod tests {
         let result = uuidv4();
         println!("UUID: {:?}", result);
         assert_ne!("", result)
+    }
+
+    #[test]
+    fn b64_encode_test() {
+        let result = base64_encode("你好, world");
+        println!("base64 encode: {:?}", result);
+        assert_eq!("5L2g5aW9LCB3b3JsZA==", result)
+    }
+
+    #[test]
+    fn b64_decode_test() {
+        let result: String = base64_decode_str("5L2g5aW9LCB3b3JsZA==");
+        println!("base64 decode: {:?}", result);
+        assert_eq!("你好, world", result)
     }
 }

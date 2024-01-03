@@ -16,6 +16,7 @@ some rust wasm tools
 + password strength
 + pinyin
 + uuid
++ base64
 
 ## Install
 
