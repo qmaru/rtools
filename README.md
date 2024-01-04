@@ -37,7 +37,9 @@ wasm-pack build -t bundler --release --scope qmaru
 
 ## Publish
 
+```shell
 wasm-pack publish
+```
 
 ## Dependencies
 
