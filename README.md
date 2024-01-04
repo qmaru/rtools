@@ -28,17 +28,16 @@ cargo install wasm-pack
 
 ```shell
 # Build wasm
-wasm-pack build --target web
+wasm-pack build -t web
 
 # Build npm pkg
-wasm-pack build --target bundler
-cd pkg
-npm link
+# --scope YourName
+wasm-pack build -t bundler --release --scope qmaru
 ```
 
 ## Publish
 
-npm publish
+wasm-pack publish
 
 ## Dependencies
 
