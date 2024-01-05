@@ -9,10 +9,12 @@ use sm3::Sm3;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+/// `Hash` hash tools
 pub struct Hash {}
 
 #[wasm_bindgen]
 impl Hash {
+    /// `generate_hash` hash wrapper
     fn generate_hash<D: Digest>(message: &str) -> String {
         let mut hasher = D::new();
         hasher.update(message);
@@ -24,30 +26,37 @@ impl Hash {
         hex_string
     }
 
+    /// `gen_md5` encode an MD5 hash
     pub fn gen_md5(message: &str) -> String {
         Self::generate_hash::<Md5>(message)
     }
 
+    /// `gen_sha256` encode a SHA-256 hash
     pub fn gen_sha256(message: &str) -> String {
         Self::generate_hash::<Sha256>(message)
     }
 
+    /// `gen_sha3_256` encode a SHA3-256 hash
     pub fn gen_sha3_256(message: &str) -> String {
         Self::generate_hash::<Sha3_256>(message)
     }
 
+    /// `gen_sm3` encode a SM3 hash
     pub fn gen_sm3(message: &str) -> String {
         Self::generate_hash::<Sm3>(message)
     }
 
+    /// `gen_blake2s256` encode a BLAKE2s hash
     pub fn gen_blake2s256(message: &str) -> String {
         Self::generate_hash::<Blake2s256>(message)
     }
 
+    /// `gen_blake2b512` encode a BLAKE2b hash
     pub fn gen_blake2b512(message: &str) -> String {
         Self::generate_hash::<Blake2b512>(message)
     }
 
+    /// `gen_blake3` encode a BLAKE3 hash
     pub fn gen_blake3(message: &str) -> String {
         let mut hasher = blake3::Hasher::new();
         hasher.update(message.as_bytes());
@@ -56,6 +65,7 @@ impl Hash {
         hex_string
     }
 
+    /// `gen_murmur32` encode a MurmurHash3-32 hash
     pub fn gen_murmur32(message: &str) -> String {
         let mut input_reader = message.as_bytes();
         let hash_result = murmur3_32(&mut input_reader, 0);
@@ -65,6 +75,7 @@ impl Hash {
         }
     }
 
+    /// `gen_murmur128` encode a MurmurHash3-128 hash
     pub fn gen_murmur128(message: &str) -> String {
         let mut input_reader = message.as_bytes();
         let hash_result = murmur3_x64_128(&mut input_reader, 0);

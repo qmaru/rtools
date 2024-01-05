@@ -4,24 +4,39 @@ some rust wasm tools
 
 ## List
 
-+ Blake2b512
-+ Blake2s256
-+ Blake3
-+ Md5
-+ Murmur3_32
-+ Murmur3_x64_128
-+ Sha256
-+ Sha3_256
-+ Sm3
-+ password strength
++ hash tools
+  + Blake2b512
+  + Blake2s256
+  + Blake3
+  + Md5
+  + Murmur3_32
+  + Murmur3_x64_128
+  + Sha256
+  + Sha3_256
+  + Sm3
+
++ parse tools
+  + base64
+
++ password tools
+  + strength
+
 + pinyin
+  + han_to_pinyin
+
 + uuid
-+ base64
+  + v4
 
 ## Install
 
 ```shell
 cargo install wasm-pack
+```
+
+## Test
+
+```shell
+cargo test -- --nocapture
 ```
 
 ## Build
@@ -50,3 +65,5 @@ wasm-pack publish
 [BLAKE3](https://github.com/BLAKE3-team/BLAKE3)
 
 [zxcvbn](https://github.com/shssoichiro/zxcvbn-rs)
+
+[pinyin](https://github.com/mozillazg/rust-pinyin)

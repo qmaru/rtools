@@ -2,10 +2,12 @@ use pinyin::ToPinyin;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+/// `Pinyin` pinyin tools
 pub struct Pinyin {}
 
 #[wasm_bindgen]
 impl Pinyin {
+    /// `han_to_pinyin` generate 汉字 to hanzi
     pub fn han_to_pinyin(hans: &str) -> String {
         let mut results = String::new();
         for pinyin in hans.to_pinyin() {

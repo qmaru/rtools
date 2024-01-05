@@ -2,14 +2,17 @@ use base64_light::{base64_decode_str, base64_encode};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+/// `Base64` base64 tools
 pub struct Base64 {}
 
 #[wasm_bindgen]
 impl Base64 {
+    /// `encode` encode content to base64
     pub fn encode(content: &str) -> String {
         base64_encode(content)
     }
 
+    /// `decode` decode base64 string
     pub fn decode(content: &str) -> String {
         base64_decode_str(content)
     }
