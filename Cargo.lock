@@ -248,6 +248,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9252111cf132ba0929b6f8e030cac2a24b507f3a4d6db6fb2896f27b354c714b"
 
 [[package]]
+name = "nanoid"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ffa00dec017b5b1a8b7cf5e2c008bfda1aa7e0697ac1508b491fdf2622fb4d8"
+dependencies = [
+ "rand",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -356,7 +365,7 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "rtools"
-version = "1.0.7"
+version = "1.0.8"
 dependencies = [
  "base64_light",
  "blake2",
@@ -364,6 +373,7 @@ dependencies = [
  "digest",
  "md-5",
  "murmur3",
+ "nanoid",
  "pinyin",
  "sha2",
  "sha3",

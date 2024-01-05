@@ -24,8 +24,9 @@ some rust wasm tools
 + pinyin
   + han_to_pinyin
 
-+ uuid
-  + v4
++ random
+  + uuid_v4
+  + nanoid
 
 ## Install
 
