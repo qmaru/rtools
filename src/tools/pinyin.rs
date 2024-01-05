@@ -17,3 +17,10 @@ impl Pinyin {
         results
     }
 }
+
+#[test]
+fn han_to_pinyin_test() {
+    let result = Pinyin::han_to_pinyin("你好");
+    println!("Pinyin: {:?}", result);
+    assert_eq!("nihao", result)
+}

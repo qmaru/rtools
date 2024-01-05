@@ -14,3 +14,10 @@ impl Password {
         }
     }
 }
+
+#[test]
+fn strength_test() {
+    let result = Password::strength("123456");
+    println!("strength: {:?}", result);
+    assert_eq!("0", result)
+}

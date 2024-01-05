@@ -11,3 +11,10 @@ impl UUID {
         id.to_string()
     }
 }
+
+#[test]
+fn v4_test() {
+    let result = UUID::v4();
+    println!("UUID: {:?}", result);
+    assert_ne!("", result)
+}
