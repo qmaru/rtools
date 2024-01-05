@@ -19,16 +19,15 @@ jobs:
 
       - uses: jetli/wasm-pack-action@v0.4.0
         with:
-          version: 'latest'
+          version: "latest"
 
       - run: cargo test
-      - run: wasm-pack build -t bundler --release --scope ${{github.repository}}
+      - run: wasm-pack build -t bundler --release --scope ${{github.repository_owner}}
 
       - uses: actions/setup-node@v3
         with:
           node-version: 20
           registry-url: "https://npm.pkg.github.com"
-          cache: "npm"
       - run: |
           cd pkg
           npm publish
