@@ -17,6 +17,7 @@ some rust wasm tools
 
 + parse tools
   + base64
+  + sqids
 
 + password tools
   + strength
@@ -27,7 +28,6 @@ some rust wasm tools
 + random
   + uuid_v4
   + nanoid
-  + sqids
 
 ## Install
 
