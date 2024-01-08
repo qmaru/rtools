@@ -20,7 +20,7 @@ some rust wasm tools
   + sqids
 
 + password tools
-  + strength
+  + ~~strength~~ (remove from 1.0.11)
 
 + pinyin
   + han_to_pinyin
