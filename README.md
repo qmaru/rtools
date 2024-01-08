@@ -27,6 +27,7 @@ some rust wasm tools
 + random
   + uuid_v4
   + nanoid
+  + sqids
 
 ## Install
 
