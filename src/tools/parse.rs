@@ -26,7 +26,7 @@ pub struct SqIDs {}
 #[wasm_bindgen]
 impl SqIDs {
     /// `encode` encode number to string
-    pub fn encode(number: u64) -> String {
+    pub fn encode(number: u64, length: u8) -> String {
         let mut numbers: Vec<u64> = Vec::new();
         for c in number.to_string().chars() {
             if let Some(number) = c.to_digit(10) {
@@ -36,10 +36,15 @@ impl SqIDs {
             }
         }
 
-        let sqids = Sqids::default();
-        let result = sqids.encode(&numbers);
-        match result {
-            Ok(id) => id,
+        let sqids = Sqids::builder().min_length(length).build();
+        match sqids {
+            Ok(sqids) => {
+                let result = sqids.encode(&numbers);
+                match result {
+                    Ok(id) => id,
+                    Err(_) => String::new(),
+                }
+            }
             Err(_) => String::new(),
         }
     }
@@ -69,7 +74,7 @@ fn b64_decode_test() {
 
 #[test]
 fn sqids_encode_test() {
-    let result = SqIDs::encode(123);
+    let result = SqIDs::encode(123, 0);
     println!("sqids encode: {:?}", result);
     assert_eq!("86Rf07", result)
 }
