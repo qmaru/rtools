@@ -50,11 +50,17 @@ impl SqIDs {
     }
 
     /// `decode` decode string to number
-    pub fn decode(content: &str) -> String {
-        let sqids = Sqids::default();
-        let numbers = sqids.decode(content);
-        let string_numbers: Vec<String> = numbers.iter().map(|&num| num.to_string()).collect();
-        string_numbers.join("")
+    pub fn decode(content: &str, length: u8) -> String {
+        let sqids = Sqids::builder().min_length(length).build();
+        match sqids {
+            Ok(sqids) => {
+                let numbers = sqids.decode(content);
+                let string_numbers: Vec<String> =
+                    numbers.iter().map(|&num| num.to_string()).collect();
+                string_numbers.join("")
+            }
+            Err(_) => String::new(),
+        }
     }
 }
 
@@ -81,7 +87,7 @@ fn sqids_encode_test() {
 
 #[test]
 fn sqids_decode_test() {
-    let result = SqIDs::decode("86Rf07");
+    let result = SqIDs::decode("86Rf07", 0);
     println!("sqids decode: {:?}", result);
     assert_eq!("123", result)
 }
