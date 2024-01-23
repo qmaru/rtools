@@ -1,6 +1,6 @@
 [package]
 name = "rtools"
-version = "1.0.13"
+version = "1.0.14"
 edition = "2021"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
@@ -16,7 +16,10 @@ blake2 = { version = "0.10.6", default-features = false }
 blake3 = { version = "1.5.0", default-features = false }
 murmur3 = { version = "0.5.2", default-features = false }
 sm3 = { version = "0.4.2", default-features = false }
-pinyin = { version = "0.10", default-features = false, features = ["plain"] }
+pinyin = { version = "0.10", default-features = false, features = [
+    "plain",
+    "with_tone",
+] }
 uuid = { version = "1.6.1", default-features = false, features = [
     "v4",
     "js",
