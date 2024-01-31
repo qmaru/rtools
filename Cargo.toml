@@ -1,6 +1,6 @@
 [package]
 name = "rtools"
-version = "1.0.14"
+version = "1.0.15"
 edition = "2021"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
