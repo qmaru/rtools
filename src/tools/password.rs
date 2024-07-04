@@ -10,7 +10,7 @@ pub struct Password {}
 impl Password {
     fn get_random(len: f32, offset: i32) -> i32 {
         let mut rng = thread_rng();
-        let base_code: i32 = (rng.gen_range(0f32, 1f32) * len).floor() as i32;
+        let base_code: i32 = (rng.gen_range(0f32..1f32) * len).floor() as i32;
         let char_code = base_code + offset;
         char_code
     }
