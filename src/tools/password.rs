@@ -111,7 +111,7 @@ fn password_random_basic_test() {
 #[test]
 fn password_random_suit_test() {
     let mut password = Password::new();
-    let rpass = password.get_random_password(false, false, false, false, 16);
+    let rpass = password.get_random_password(true, true, true, true, 16);
     match rpass {
         Ok(p) => println!("password: {}", p),
         Err(e) => eprintln!("{}", e.is_string()),
