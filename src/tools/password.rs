@@ -58,7 +58,7 @@ impl Password {
         has_number: bool,
         has_symbol: bool,
         length: usize,
-    ) -> String {
+    ) -> Result<String, JsValue> {
         let mut char_pool = String::new();
         let mut password: Vec<char> = Vec::with_capacity(length);
 
@@ -80,7 +80,9 @@ impl Password {
         }
 
         if char_pool.is_empty() {
-            panic!("At least one character type must be included.");
+            return Err(JsValue::from_str(
+                "At least one character type must be included.",
+            ));
         }
 
         for _ in 0..(length - password.len()) {
@@ -88,21 +90,30 @@ impl Password {
         }
 
         password.shuffle(&mut self.rng);
-        password.iter().collect()
+        Ok(password.iter().collect())
     }
 }
 
 #[test]
-fn password_random_test() {
+fn password_random_basic_test() {
     let mut password = Password::new();
     let upper = password.get_random_upper();
     let lower = password.get_random_lower();
     let number = password.get_random_number();
     let symbol = password.get_random_symbol();
     let bytesp = password.get_random_bytes(16);
-    let rpass = password.get_random_password(true, true, true, true, 16);
     println!(
-        "upper: {} lower: {} number: {} symbol: {} bytes: {} password: {}",
-        upper, lower, number, symbol, bytesp, rpass
+        "upper: {} lower: {} number: {} symbol: {} bytes: {} ",
+        upper, lower, number, symbol, bytesp
     );
+}
+
+#[test]
+fn password_random_suit_test() {
+    let mut password = Password::new();
+    let rpass = password.get_random_password(false, false, false, false, 16);
+    match rpass {
+        Ok(p) => println!("password: {}", p),
+        Err(e) => eprintln!("{}", e.is_string()),
+    }
 }
