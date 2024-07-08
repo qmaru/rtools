@@ -66,17 +66,17 @@ impl Hash {
     }
 
     /// `gen_murmur32` encode a MurmurHash3-32 hash
-    pub fn gen_murmur32(message: &str) -> String {
+    pub fn gen_murmur32(message: &str) -> Option<String> {
         let mut input_reader = message.as_bytes();
         let hash_result = murmur3_32(&mut input_reader, 0);
         match hash_result {
-            Ok(result) => result.to_string(),
-            Err(_) => String::new(),
+            Ok(result) => Some(result.to_string()),
+            Err(_) => None,
         }
     }
 
     /// `gen_murmur128` encode a MurmurHash3-128 hash
-    pub fn gen_murmur128(message: &str) -> String {
+    pub fn gen_murmur128(message: &str) -> Option<String> {
         let mut input_reader = message.as_bytes();
         let hash_result = murmur3_x64_128(&mut input_reader, 0);
 
@@ -87,9 +87,9 @@ impl Hash {
                 let low_string = format!("{:016x}", low);
                 let high_string = format!("{:016x}", high);
                 let hash_string = format!("{}{}", low_string, high_string);
-                hash_string
+                Some(hash_string)
             }
-            Err(_) => String::new(),
+            Err(_) => None,
         }
     }
 }
@@ -165,12 +165,14 @@ fn blake3_test() {
 fn murmur3_32_test() {
     let result = Hash::gen_murmur32("hello world");
     println!("murmur32: {:?}", result);
-    assert_eq!("1586663183", result)
+    assert!(result.is_some());
+    assert_eq!("1586663183", result.unwrap());
 }
 
 #[test]
 fn murmur3_128_test() {
     let result = Hash::gen_murmur128("hello world");
     println!("murmur128: {:?}", result);
-    assert_eq!("533f6046eb7f610eab97467d60eb63b1", result)
+    assert!(result.is_some());
+    assert_eq!("533f6046eb7f610eab97467d60eb63b1", result.unwrap());
 }

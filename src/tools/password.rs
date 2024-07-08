@@ -3,6 +3,11 @@ use wasm_bindgen::prelude::*;
 use base64_light::base64_encode_bytes;
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng, RngCore};
 
+const UPPERCASE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LOWERCASE: &str = "abcdefghijklmnopqrstuvwxyz";
+const NUMBER: &str = "0123456789";
+const SYMBOLS: &str = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
 #[wasm_bindgen]
 /// `Password` password tools
 pub struct Password {
@@ -13,7 +18,7 @@ pub struct Password {
 impl Password {
     pub fn new() -> Self {
         let rng = thread_rng();
-        Password { rng: rng }
+        Password { rng }
     }
 
     /// `get_random` random char
@@ -38,9 +43,12 @@ impl Password {
 
     /// `get_random_symbol` randomly generate a symbol
     pub fn get_random_symbol(&mut self) -> char {
-        let symbols = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-        let index = self.get_random(0, symbols.len() as u8) as usize;
-        symbols.chars().nth(index).unwrap()
+        let index = self.get_random(0, SYMBOLS.len() as u8) as usize;
+        let symbol = SYMBOLS.chars().nth(index);
+        if let Some(symbol) = symbol {
+            return symbol;
+        }
+        return ' ';
     }
 
     /// `get_random_bytes` randomly generate [len] bytes
@@ -63,19 +71,19 @@ impl Password {
         let mut password: Vec<char> = Vec::with_capacity(length);
 
         if has_upper {
-            char_pool.push_str("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+            char_pool.push_str(UPPERCASE);
             password.push(self.get_random_upper())
         }
         if has_lower {
-            char_pool.push_str("abcdefghijklmnopqrstuvwxyz");
+            char_pool.push_str(LOWERCASE);
             password.push(self.get_random_lower())
         }
         if has_number {
-            char_pool.push_str("0123456789");
+            char_pool.push_str(NUMBER);
             password.push(self.get_random_number())
         }
         if has_symbol {
-            char_pool.push_str("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+            char_pool.push_str(SYMBOLS);
             password.push(self.get_random_symbol())
         }
 
@@ -86,7 +94,10 @@ impl Password {
         }
 
         for _ in 0..(length - password.len()) {
-            password.push(*char_pool.as_bytes().choose(&mut self.rng).unwrap() as char);
+            let result = char_pool.as_bytes().choose(&mut self.rng);
+            if let Some(result) = result {
+                password.push(*result as char);
+            }
         }
 
         password.shuffle(&mut self.rng);

@@ -23,16 +23,30 @@ impl Base64 {
 /// `SqIDs` Generate unique IDs from numbers
 pub struct SqIDs {}
 
+const MAX_SAFE_INTEGER: u64 = (1 << 53) - 1;
+
 #[wasm_bindgen]
 impl SqIDs {
     /// `encode` encode number to string
-    pub fn encode(number: u64, length: u8) -> String {
+    pub fn encode(number: i64, length: u8) -> Result<String, JsValue> {
+        if number < 0 {
+            let errmsg = format!(
+                "Value ${number} is not a valid integer, between 0 and ${MAX_SAFE_INTEGER}"
+            );
+            return Err(JsValue::from_str(&errmsg));
+        }
+
+        if number > MAX_SAFE_INTEGER as i64 {
+            let errmsg = format!(
+                "Value ${number} is not a valid integer, between 0 and ${MAX_SAFE_INTEGER}"
+            );
+            return Err(JsValue::from_str(&errmsg));
+        }
+
         let mut numbers: Vec<u64> = Vec::new();
         for c in number.to_string().chars() {
             if let Some(number) = c.to_digit(10) {
                 numbers.push(number as u64)
-            } else {
-                return String::new();
             }
         }
 
@@ -41,25 +55,25 @@ impl SqIDs {
             Ok(sqids) => {
                 let result = sqids.encode(&numbers);
                 match result {
-                    Ok(id) => id,
-                    Err(_) => String::new(),
+                    Ok(id) => Ok(id),
+                    Err(err) => Err(JsValue::from_str(&err.to_string())),
                 }
             }
-            Err(_) => String::new(),
+            Err(err) => Err(JsValue::from_str(&err.to_string())),
         }
     }
 
     /// `decode` decode string to number
-    pub fn decode(content: &str, length: u8) -> String {
+    pub fn decode(content: &str, length: u8) -> Option<String> {
         let sqids = Sqids::builder().min_length(length).build();
         match sqids {
             Ok(sqids) => {
                 let numbers = sqids.decode(content);
                 let string_numbers: Vec<String> =
                     numbers.iter().map(|&num| num.to_string()).collect();
-                string_numbers.join("")
+                Some(string_numbers.join(""))
             }
-            Err(_) => String::new(),
+            Err(_) => None,
         }
     }
 }
@@ -81,13 +95,19 @@ fn b64_decode_test() {
 #[test]
 fn sqids_encode_test() {
     let result = SqIDs::encode(123, 0);
-    println!("sqids encode: {:?}", result);
-    assert_eq!("86Rf07", result)
+    match result {
+        Ok(result) => {
+            println!("sqids encode: {:?}", result);
+            assert_eq!("86Rf07", result);
+        }
+        Err(err) => eprintln!("sqids error: {:?}", err),
+    }
 }
 
 #[test]
 fn sqids_decode_test() {
     let result = SqIDs::decode("86Rf07", 0);
     println!("sqids decode: {:?}", result);
-    assert_eq!("123", result)
+    assert!(result.is_some());
+    assert_eq!("123", result.unwrap());
 }
