@@ -110,7 +110,7 @@ fn sqids_encode_test() {
 
 #[test]
 fn sqids_decode_test() {
-    let result = SqIDs::decode("fgdasdfasd234vf!@3q23", 0);
+    let result = SqIDs::decode("86Rf07", 0);
     println!("sqids decode: {:?}", result);
     assert!(result.is_some());
     assert_eq!("123", result.unwrap());
