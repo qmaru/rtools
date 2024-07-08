@@ -30,16 +30,14 @@ impl SqIDs {
     /// `encode` encode number to string
     pub fn encode(number: i64, length: u8) -> Result<String, JsValue> {
         if number < 0 {
-            let errmsg = format!(
-                "Value ${number} is not a valid integer, between 0 and ${MAX_SAFE_INTEGER}"
-            );
+            let errmsg =
+                format!("Value {number} is not a valid integer, between 0 and {MAX_SAFE_INTEGER}");
             return Err(JsValue::from_str(&errmsg));
         }
 
         if number > MAX_SAFE_INTEGER as i64 {
-            let errmsg = format!(
-                "Value ${number} is not a valid integer, between 0 and ${MAX_SAFE_INTEGER}"
-            );
+            let errmsg =
+                format!("Value {number} is not a valid integer, between 0 and {MAX_SAFE_INTEGER}");
             return Err(JsValue::from_str(&errmsg));
         }
 
