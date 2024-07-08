@@ -71,7 +71,11 @@ impl SqIDs {
                 let numbers = sqids.decode(content);
                 let string_numbers: Vec<String> =
                     numbers.iter().map(|&num| num.to_string()).collect();
-                Some(string_numbers.join(""))
+
+                if string_numbers.len() != 0 {
+                    return Some(string_numbers.join(""));
+                }
+                return None;
             }
             Err(_) => None,
         }
@@ -106,7 +110,7 @@ fn sqids_encode_test() {
 
 #[test]
 fn sqids_decode_test() {
-    let result = SqIDs::decode("86Rf07", 0);
+    let result = SqIDs::decode("fgdasdfasd234vf!@3q23", 0);
     println!("sqids decode: {:?}", result);
     assert!(result.is_some());
     assert_eq!("123", result.unwrap());
