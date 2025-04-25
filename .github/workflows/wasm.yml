@@ -6,59 +6,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  wasm-bundler:
-    name: wasm-bundler
+  wasm-build-publish:
+    name: Build & Publish WASM (${{ matrix.target }})
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
 
+    strategy:
+      matrix:
+        target: [bundler, web]
+
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - uses: qmaru/wasm-pack-action@v0.5.0
+      - name: Setup wasm-pack
+        uses: qmaru/wasm-pack-action@v0.5.0
         with:
-          version: "latest"
+          version: latest
 
-      - run: cargo test
-      - run: wasm-pack build -t bundler --release --scope ${{github.repository_owner}}
+      - name: Run Tests
+        run: cargo test
 
-      - uses: actions/setup-node@v4
+      - name: Rename package for web (only for web target)
+        if: matrix.target == 'web'
+        run: sed -i 's#name = "rtools"#name = "rtools-web"#g' Cargo.toml
+
+      - name: Build WASM (${{ matrix.target }} target)
+        run: wasm-pack build -t ${{ matrix.target }} --release --scope ${{ github.repository_owner }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: "https://npm.pkg.github.com"
-      - run: |
+
+      - name: Publish npm package
+        run: |
           cd pkg
           npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-  wasm-web:
-    name: wasm-web
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - uses: qmaru/wasm-pack-action@v0.5.0
-        with:
-          version: "latest"
-
-      - run: cargo test
-      - run: sed -i 's#name = "rtools"#name = "rtools-web"#g' Cargo.toml
-      - run: wasm-pack build -t web --release --scope ${{github.repository_owner}}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: "https://npm.pkg.github.com"
-      - run: |
-          cd pkg
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
