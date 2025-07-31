@@ -1,6 +1,6 @@
 [package]
 name = "rtools"
-version = "1.0.37"
+version = "1.0.38"
 edition = "2021"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
@@ -26,6 +26,7 @@ nanoid = { version = "0.4.0", default-features = false }
 sqids = { version = "0.4.1", default-features = false }
 rand = { version = "0.8.5", default-features = false }
 getrandom = { version = "0.2", features = ["js"] }
+otpauth = "0.5.1"
 
 [lib]
 crate-type = ["cdylib"]
