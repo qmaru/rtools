@@ -1,6 +1,6 @@
 [package]
 name = "rtools"
-version = "1.0.39"
+version = "1.1.0"
 edition = "2021"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
@@ -21,12 +21,14 @@ pinyin = { version = "0.10", default-features = false, features = [
     "with_tone",
 ] }
 uuid = { version = "1.9.1", default-features = false, features = ["v4", "js"] }
-base64_light = { version = "0.1.5", default-features = false }
 nanoid = { version = "0.4.0", default-features = false }
 sqids = { version = "0.4.1", default-features = false }
 rand = { version = "0.8.5", default-features = false }
 getrandom = { version = "0.2", features = ["js"] }
 otpauth = "0.5.1"
+chacha20poly1305 = "0.10.1"
+hkdf = "0.12.4"
+data-encoding = "2.9.0"
 
 [lib]
 crate-type = ["cdylib"]

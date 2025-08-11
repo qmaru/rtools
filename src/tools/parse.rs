@@ -1,21 +1,54 @@
-use base64_light::{base64_decode_str, base64_encode};
+use data_encoding::{Specification, BASE32, BASE64};
 use sqids::Sqids;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-/// `Base64` base64 tools
-pub struct Base64 {}
+/// `DataEncoding` Data encoding/decoding tools
+pub struct DataEncoding {}
 
 #[wasm_bindgen]
-impl Base64 {
+impl DataEncoding {
     /// `encode` encode content to base64
-    pub fn encode(content: &str) -> String {
-        base64_encode(content)
+    pub fn encode64(content: &str) -> String {
+        BASE64.encode(content.as_bytes())
     }
 
     /// `decode` decode base64 string
-    pub fn decode(content: &str) -> String {
-        base64_decode_str(content)
+    pub fn decode64(content: &str) -> String {
+        let bytes = BASE64.decode(content.as_bytes()).unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    fn base32_nopad() -> data_encoding::Encoding {
+        let mut spec = Specification::new();
+        spec.symbols.push_str("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567");
+        spec.bit_order = data_encoding::BitOrder::MostSignificantFirst;
+        spec.padding = None;
+        spec.encoding().unwrap()
+    }
+
+    /// `encode` encode content to base32
+    pub fn encode32(content: &str) -> String {
+        BASE32.encode(content.as_bytes())
+    }
+
+    /// `decode` decode base32 string
+    pub fn decode32(content: &str) -> String {
+        let bytes = BASE32.decode(content.as_bytes()).unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    /// `encode` encode content to base32 no-padding
+    pub fn encode32_nopad(content: &str) -> String {
+        let enc = DataEncoding::base32_nopad();
+        enc.encode(content.as_bytes())
+    }
+
+    /// `decode` decode base32 no-padding string
+    pub fn decode32_nopad(content: &str) -> String {
+        let enc = DataEncoding::base32_nopad();
+        let bytes = enc.decode(content.as_bytes()).unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
     }
 }
 
@@ -82,16 +115,36 @@ impl SqIDs {
 
 #[test]
 fn b64_encode_test() {
-    let result = Base64::encode("你好, world");
+    let result = DataEncoding::encode64("你好, world");
     println!("base64 encode: {:?}", result);
     assert_eq!("5L2g5aW9LCB3b3JsZA==", result)
 }
 
 #[test]
 fn b64_decode_test() {
-    let result: String = Base64::decode("5L2g5aW9LCB3b3JsZA==");
+    let result: String = DataEncoding::decode64("5L2g5aW9LCB3b3JsZA==");
     println!("base64 decode: {:?}", result);
     assert_eq!("你好, world", result)
+}
+
+#[test]
+fn b32_decode_test() {
+    let result1: String = DataEncoding::decode32("4S62BZNFXUWCA53POJWGI===");
+    let result2: String = DataEncoding::decode32_nopad("4S62BZNFXUWCA53POJWGI");
+    println!("base32 decode: {:?}", result1);
+    println!("base32 decode no-padding: {:?}", result2);
+    assert_eq!("你好, world", result1);
+    assert_eq!("你好, world", result2);
+}
+
+#[test]
+fn b32_encode_test() {
+    let result1 = DataEncoding::encode32("你好, world");
+    let result2 = DataEncoding::encode32_nopad("你好, world");
+    println!("base32 encode: {:?}", result1);
+    println!("base32 encode no-padding: {:?}", result2);
+    assert_eq!("4S62BZNFXUWCA53POJWGI===", result1);
+    assert_eq!("4S62BZNFXUWCA53POJWGI", result2);
 }
 
 #[test]

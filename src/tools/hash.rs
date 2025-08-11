@@ -1,6 +1,8 @@
 use blake2::{Blake2b512, Blake2s256};
 use blake3;
+use data_encoding::BASE64;
 use digest::Digest;
+use hkdf::Hkdf;
 use md5::Md5;
 use murmur3::{murmur3_32, murmur3_x64_128};
 use sha2::Sha256;
@@ -92,6 +94,28 @@ impl Hash {
             Err(_) => None,
         }
     }
+
+    /// `gen_hkdf` encode a hkdf hash
+    pub fn gen_hkdf(ikm: &[u8], salt: &[u8], info: &[u8], out_len: usize) -> Option<Vec<u8>> {
+        let salt_option = if salt.is_empty() { None } else { Some(salt) };
+        let hk = Hkdf::<Sha256>::new(salt_option, ikm);
+        let mut okm = vec![0u8; out_len];
+        if hk.expand(info, &mut okm).is_ok() {
+            Some(okm)
+        } else {
+            None
+        }
+    }
+
+    /// `gen_hkdf` encode a hkdf base64
+    pub fn gen_hkdf_b64(ikm: &[u8], salt: &[u8], info: &[u8], out_len: usize) -> Option<String> {
+        let key = Hash::gen_hkdf(ikm, salt, info, out_len);
+        if let Some(key) = key {
+            Some(BASE64.encode(&key))
+        } else {
+            None
+        }
+    }
 }
 
 #[test]
@@ -175,4 +199,20 @@ fn murmur3_128_test() {
     println!("murmur128: {:?}", result);
     assert!(result.is_some());
     assert_eq!("533f6046eb7f610eab97467d60eb63b1", result.unwrap());
+}
+
+#[test]
+fn hkdf_test() {
+    let ikm = b"hello input";
+    let salt = b"hello salt";
+    let info = b"hello info";
+    let out_len = 32;
+
+    let result = Hash::gen_hkdf_b64(ikm, salt, info, out_len);
+    println!("hkdf: {:?}", result);
+    assert!(result.is_some());
+    assert_eq!(
+        "A0oeefGWqceKVpXoudSQQAf96rxzkSPcPOLpao2eQ3A=",
+        result.unwrap()
+    );
 }

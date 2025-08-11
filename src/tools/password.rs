@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-use base64_light::base64_encode_bytes;
+use data_encoding::BASE64;
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng, RngCore};
 
 const UPPERCASE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -55,7 +55,7 @@ impl Password {
     pub fn get_random_bytes(&self, len: usize) -> String {
         let mut random_bytes_array = vec![0u8; len];
         rand::thread_rng().fill_bytes(&mut random_bytes_array);
-        base64_encode_bytes(&random_bytes_array)
+        BASE64.encode(&random_bytes_array)
     }
 
     /// `get_random_password` randomly password

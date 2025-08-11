@@ -1,3 +1,4 @@
+use getrandom::getrandom;
 use nanoid::nanoid;
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
@@ -28,6 +29,31 @@ impl NanoID {
     }
 }
 
+#[wasm_bindgen]
+/// `SafeRandom` safety random
+pub struct SafeRandom {}
+impl SafeRandom {
+    /// `gen_bytes` generate a safety bytes
+    pub fn gen_bytes(len: usize) -> Vec<u8> {
+        let mut buf = vec![0u8; len];
+        getrandom(&mut buf).expect("Failed to generate random bytes");
+        buf
+    }
+
+    /// `gen_secret` generate a 32-bytes secret
+    pub fn gen_secret() -> Vec<u8> {
+        Self::gen_bytes(32)
+    }
+
+    /// `gen_nonce` generate a 12-bytes nonce
+    pub fn gen_nonce() -> [u8; 12] {
+        let buf = Self::gen_bytes(12);
+        let mut nonce = [0u8; 12];
+        nonce.copy_from_slice(&buf);
+        nonce
+    }
+}
+
 #[test]
 fn uuid_v4_test() {
     let result = UUID::v4();
@@ -40,4 +66,10 @@ fn nanoid_test() {
     let result = NanoID::nanoid(21);
     println!("nanoid: {:?}", result);
     assert_ne!("", result)
+}
+
+#[test]
+fn safety_test() {
+    let result = SafeRandom::gen_nonce();
+    println!("safety: {:?}", result);
 }
