@@ -114,7 +114,7 @@ fn nanoid_test() {
 
 #[test]
 fn safety_test() {
-    let result = SafeRandom::gen_nonce();
+    let result = SafeRandom::gen_bytes(16);
     println!("safety: {:?}", result.raw());
     println!("safety: {:?}", result.to_base32());
     println!("safety: {:?}", result.to_base64());
