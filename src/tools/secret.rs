@@ -42,37 +42,37 @@ pub struct Secret {}
 #[wasm_bindgen]
 impl Secret {
     /// `xchacha_encrypt` plaintext with given key_b64 (32 bytes) and nonce_b64 (24 bytes).
-    pub fn xchacha_encrypt(key_b64: &str, nonce_b64: &str, plaintext: &str) -> String {
+    pub fn xchacha_encrypt(key_b64: &str, nonce_b64: &str, plaintext: &str) -> Option<String> {
         let key = match decode_key(key_b64) {
             Ok(k) => k,
-            Err(e) => return e,
+            Err(_) => return None,
         };
         let nonce_bytes = match decode_nonce(nonce_b64, 24) {
             Ok(n) => n,
-            Err(e) => return e,
+            Err(_) => return None,
         };
 
         let cipher = XChaCha20Poly1305::new(&key);
         let nonce = XNonce::from_slice(&nonce_bytes);
         match cipher.encrypt(nonce, plaintext.as_bytes()) {
-            Ok(ct) => BASE64.encode(&ct),
-            Err(_) => "error: encrypt failed".into(),
+            Ok(ct) => Some(BASE64.encode(&ct)),
+            Err(_) => return None,
         }
     }
 
     /// `xchacha_decrypt` ciphertext_b64 with given key_b64 and nonce_b64.
-    pub fn xchacha_decrypt(key_b64: &str, nonce_b64: &str, ciphertext_b64: &str) -> String {
+    pub fn xchacha_decrypt(key_b64: &str, nonce_b64: &str, ciphertext_b64: &str) -> Option<String> {
         let key = match decode_key(key_b64) {
             Ok(k) => k,
-            Err(e) => return e,
+            Err(_) => return None,
         };
         let nonce_bytes = match decode_nonce(nonce_b64, 24) {
             Ok(n) => n,
-            Err(e) => return e,
+            Err(_) => return None,
         };
         let ciphertext = match decode_ciphertext(ciphertext_b64) {
             Ok(c) => c,
-            Err(e) => return e,
+            Err(_) => return None,
         };
 
         let cipher = XChaCha20Poly1305::new(&key);
@@ -80,55 +80,55 @@ impl Secret {
 
         match cipher.decrypt(nonce, ciphertext.as_ref()) {
             Ok(pt) => match String::from_utf8(pt) {
-                Ok(s) => s,
-                Err(_) => "error: decrypted plaintext not utf-8".into(),
+                Ok(s) => Some(s),
+                Err(_) => return None,
             },
-            Err(_) => "error: decrypt failed".into(),
+            Err(_) => return None,
         }
     }
 
     /// `chacha_encrypt` plaintext with given key_b64 (32 bytes) and nonce_b64 (12 bytes).
-    pub fn chacha_encrypt(key_b64: &str, nonce_b64: &str, plaintext: &str) -> String {
+    pub fn chacha_encrypt(key_b64: &str, nonce_b64: &str, plaintext: &str) -> Option<String> {
         let key = match decode_key(key_b64) {
             Ok(k) => k,
-            Err(e) => return e,
+            Err(_) => return None,
         };
         let nonce_bytes = match decode_nonce(nonce_b64, 12) {
             Ok(n) => n,
-            Err(e) => return e,
+            Err(_) => return None,
         };
         let cipher = ChaCha20Poly1305::new(&key);
         let nonce = Nonce::from_slice(&nonce_bytes);
 
         match cipher.encrypt(nonce, plaintext.as_bytes()) {
-            Ok(ct) => BASE64.encode(&ct),
-            Err(_) => "error: encrypt failed".into(),
+            Ok(ct) => Some(BASE64.encode(&ct)),
+            Err(_) => return None,
         }
     }
 
     /// `chacha_decrypt` ciphertext_b64 with given key_b64 and nonce_b64.
-    pub fn chacha_decrypt(key_b64: &str, nonce_b64: &str, ciphertext_b64: &str) -> String {
+    pub fn chacha_decrypt(key_b64: &str, nonce_b64: &str, ciphertext_b64: &str) -> Option<String> {
         let key = match decode_key(key_b64) {
             Ok(k) => k,
-            Err(e) => return e,
+            Err(_) => return None,
         };
         let nonce_bytes = match decode_nonce(nonce_b64, 12) {
             Ok(n) => n,
-            Err(e) => return e,
+            Err(_) => return None,
         };
         let ciphertext = match decode_ciphertext(ciphertext_b64) {
             Ok(c) => c,
-            Err(e) => return e,
+            Err(_) => return None,
         };
 
         let cipher = ChaCha20Poly1305::new(&key);
         let nonce = Nonce::from_slice(&nonce_bytes);
         match cipher.decrypt(nonce, ciphertext.as_ref()) {
             Ok(pt) => match String::from_utf8(pt) {
-                Ok(s) => s,
-                Err(_) => "error: decrypted plaintext not utf-8".into(),
+                Ok(s) => Some(s),
+                Err(_) => return None,
             },
-            Err(_) => "error: decrypt failed".into(),
+            Err(_) => return None,
         }
     }
 }
@@ -142,16 +142,13 @@ fn chacha_test() {
     let key_b64 = BASE64.encode(&key_bytes);
     let nonce_b64 = BASE64.encode(&nonce_bytes);
 
-    let ct_b64 = Secret::chacha_encrypt(&key_b64, &nonce_b64, plaintext);
-    assert!(!ct_b64.starts_with("error:"), "encrypt failed: {}", ct_b64);
+    let enc = Secret::chacha_encrypt(&key_b64, &nonce_b64, plaintext);
+    assert!(enc.is_some());
 
-    let recovered = Secret::chacha_decrypt(&key_b64, &nonce_b64, &ct_b64);
-    assert!(
-        !recovered.starts_with("error:"),
-        "decrypt failed: {}",
-        recovered
-    );
-    assert_eq!(recovered, plaintext);
+    let dec = Secret::chacha_decrypt(&key_b64, &nonce_b64, &enc.unwrap());
+    assert!(dec.is_some());
+
+    assert_eq!(plaintext, dec.unwrap());
 }
 
 #[test]
@@ -163,14 +160,11 @@ fn xchacha_test() {
     let key_b64 = BASE64.encode(&key_bytes);
     let nonce_b64 = BASE64.encode(&nonce_bytes);
 
-    let ct_b64 = Secret::xchacha_encrypt(&key_b64, &nonce_b64, plaintext);
-    assert!(!ct_b64.starts_with("error:"), "encrypt failed: {}", ct_b64);
+    let enc = Secret::xchacha_encrypt(&key_b64, &nonce_b64, plaintext);
+    assert!(enc.is_some());
 
-    let recovered = Secret::xchacha_decrypt(&key_b64, &nonce_b64, &ct_b64);
-    assert!(
-        !recovered.starts_with("error:"),
-        "decrypt failed: {}",
-        recovered
-    );
-    assert_eq!(recovered, plaintext);
+    let dec = Secret::xchacha_decrypt(&key_b64, &nonce_b64, &enc.unwrap());
+    assert!(dec.is_some());
+
+    assert_eq!(plaintext, dec.unwrap());
 }
