@@ -492,7 +492,7 @@ dependencies = [
 
 [[package]]
 name = "rtools"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "blake2",
  "blake3",

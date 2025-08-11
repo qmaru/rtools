@@ -32,6 +32,8 @@ impl NanoID {
 #[wasm_bindgen]
 /// `SafeRandom` safety random
 pub struct SafeRandom {}
+
+#[wasm_bindgen]
 impl SafeRandom {
     /// `gen_bytes` generate a safety bytes
     pub fn gen_bytes(len: usize) -> Vec<u8> {
@@ -46,11 +48,8 @@ impl SafeRandom {
     }
 
     /// `gen_nonce` generate a 12-bytes nonce
-    pub fn gen_nonce() -> [u8; 12] {
-        let buf = Self::gen_bytes(12);
-        let mut nonce = [0u8; 12];
-        nonce.copy_from_slice(&buf);
-        nonce
+    pub fn gen_nonce() -> Vec<u8> {
+        Self::gen_bytes(12)
     }
 }
 
