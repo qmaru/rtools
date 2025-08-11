@@ -72,14 +72,29 @@ impl SafeRandom {
         SafeBytes { data: buf }
     }
 
-    /// `gen_secret` generate a 32-bytes secret
-    pub fn gen_secret() -> SafeBytes {
+    /// `gen_secret_16_bytes` generate a 16 bytes(128 bit) secret
+    pub fn gen_secret_16_bytes() -> SafeBytes {
+        Self::gen_bytes(16)
+    }
+
+    /// `gen_secret_32_bytes` generate a 32 bytes(256 bit) secret
+    pub fn gen_secret_32_bytes() -> SafeBytes {
         Self::gen_bytes(32)
     }
 
-    /// `gen_nonce` generate a 12-bytes nonce
-    pub fn gen_nonce() -> SafeBytes {
+    /// `gen_nonce_12_bytes` generate a 12 bytes(96 bit) nonce
+    pub fn gen_nonce_12_bytes() -> SafeBytes {
         Self::gen_bytes(12)
+    }
+
+    /// `gen_nonce_16_bytes` generate a 16 bytes(128 bit) nonce
+    pub fn gen_nonce_16_bytes() -> SafeBytes {
+        Self::gen_bytes(16)
+    }
+
+    /// `gen_nonce_24_bytes` generate a 24 bytes(192 bit) nonce
+    pub fn gen_nonce_24_bytes() -> SafeBytes {
+        Self::gen_bytes(24)
     }
 }
 
