@@ -1,4 +1,4 @@
-use data_encoding::{BASE64, HEXLOWER};
+use data_encoding::{BASE32, BASE64, HEXLOWER};
 use getrandom::getrandom;
 use nanoid::nanoid;
 use uuid::Uuid;
@@ -43,6 +43,10 @@ pub struct SafeBytes {
 impl SafeBytes {
     pub fn raw(&self) -> Vec<u8> {
         self.data.clone()
+    }
+
+    pub fn to_base32(&self) -> String {
+        BASE32.encode(&self.data)
     }
 
     pub fn to_base64(&self) -> String {
