@@ -47,19 +47,19 @@ impl SafeBytes {
     }
 
     pub fn to_base32(&self) -> String {
-        DataEncoding::encode32(&String::from_utf8_lossy(&self.data))
+        DataEncoding::encode32_bytes(&self.data)
     }
 
     pub fn to_base32_nopad(&self) -> String {
-        DataEncoding::encode32_nopad(&String::from_utf8_lossy(&self.data))
+        DataEncoding::encode32_nopad_bytes(&self.data)
     }
 
     pub fn to_base64(&self) -> String {
-        DataEncoding::encode64(&String::from_utf8_lossy(&self.data))
+        DataEncoding::encode64_bytes(&self.data)
     }
 
     pub fn to_hex(&self) -> String {
-        DataEncoding::encode_hex(&String::from_utf8_lossy(&self.data))
+        DataEncoding::encode_hex_bytes(&self.data)
     }
 }
 

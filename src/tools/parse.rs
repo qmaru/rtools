@@ -8,17 +8,6 @@ pub struct DataEncoding {}
 
 #[wasm_bindgen]
 impl DataEncoding {
-    /// `encode` encode content to base64
-    pub fn encode64(content: &str) -> String {
-        BASE64.encode(content.as_bytes())
-    }
-
-    /// `decode` decode base64 string
-    pub fn decode64(content: &str) -> String {
-        let bytes = BASE64.decode(content.as_bytes()).unwrap_or_default();
-        String::from_utf8(bytes).unwrap_or_default()
-    }
-
     fn base32_nopad() -> data_encoding::Encoding {
         let mut spec = Specification::new();
         spec.symbols.push_str("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567");
@@ -27,28 +16,71 @@ impl DataEncoding {
         spec.encoding().unwrap()
     }
 
-    /// `encode` encode content to base32
+    /// `encode64` encode content to base64
+    pub fn encode64(content: &str) -> String {
+        BASE64.encode(content.as_bytes())
+    }
+
+    /// `decode64` decode base64 string
+    pub fn decode64(content: &str) -> String {
+        let bytes = BASE64.decode(content.as_bytes()).unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    /// `encode64_bytes` decode base64 bytes
+    pub fn encode64_bytes(content: &[u8]) -> String {
+        BASE64.encode(content)
+    }
+
+    /// `decode64_bytes` decode base64 bytes
+    pub fn decode64_bytes(content: &str) -> Vec<u8> {
+        BASE64.decode(content.as_bytes()).unwrap_or_default()
+    }
+
+    /// `encode32` encode content to base32
     pub fn encode32(content: &str) -> String {
         BASE32.encode(content.as_bytes())
     }
 
-    /// `decode` decode base32 string
+    /// `decode32` decode base32 string
     pub fn decode32(content: &str) -> String {
         let bytes = BASE32.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
     }
 
-    /// `encode` encode content to base32 no-padding
+    /// `encode32_nopad` encode content to base32 no-padding
     pub fn encode32_nopad(content: &str) -> String {
         let enc = DataEncoding::base32_nopad();
         enc.encode(content.as_bytes())
     }
 
-    /// `decode` decode base32 no-padding string
+    /// `decode32_nopad` decode base32 no-padding string
     pub fn decode32_nopad(content: &str) -> String {
         let enc = DataEncoding::base32_nopad();
         let bytes = enc.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    /// `encode32_bytes` encode content to base32 bytes
+    pub fn encode32_bytes(content: &[u8]) -> String {
+        BASE32.encode(content)
+    }
+
+    /// `decode32_bytes` decode base32 bytes
+    pub fn decode32_bytes(content: &str) -> Vec<u8> {
+        BASE32.decode(content.as_bytes()).unwrap_or_default()
+    }
+
+    /// `encode32_nopad_bytes` encode content to base32 no-padding bytes
+    pub fn encode32_nopad_bytes(content: &[u8]) -> String {
+        let enc = DataEncoding::base32_nopad();
+        enc.encode(content)
+    }
+
+    /// `decode32_nopad_bytes` decode base32 no-padding bytes
+    pub fn decode32_nopad_bytes(content: &str) -> Vec<u8> {
+        let enc = DataEncoding::base32_nopad();
+        enc.decode(content.as_bytes()).unwrap_or_default()
     }
 
     /// `encode_hex` encode hex string
@@ -60,6 +92,16 @@ impl DataEncoding {
     pub fn decode_hex(content: &str) -> String {
         let bytes = HEXLOWER.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    /// `encode_hex_bytes` encode hex bytes
+    pub fn encode_hex_bytes(content: &[u8]) -> String {
+        HEXLOWER.encode(content)
+    }
+
+    /// `decode_hex_bytes` encode hex bytes
+    pub fn decode_hex_bytes(content: &str) -> Vec<u8> {
+        HEXLOWER.decode(content.as_bytes()).unwrap_or_default()
     }
 }
 
