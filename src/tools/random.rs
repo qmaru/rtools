@@ -1,3 +1,4 @@
+use data_encoding::{BASE64, HEXLOWER};
 use getrandom::getrandom;
 use nanoid::nanoid;
 use uuid::Uuid;
@@ -34,21 +35,41 @@ impl NanoID {
 pub struct SafeRandom {}
 
 #[wasm_bindgen]
+pub struct SafeBytes {
+    data: Vec<u8>,
+}
+
+#[wasm_bindgen]
+impl SafeBytes {
+    pub fn raw(&self) -> Vec<u8> {
+        self.data.clone()
+    }
+
+    pub fn to_base64(&self) -> String {
+        BASE64.encode(&self.data)
+    }
+
+    pub fn to_hex(&self) -> String {
+        HEXLOWER.encode(&self.data)
+    }
+}
+
+#[wasm_bindgen]
 impl SafeRandom {
     /// `gen_bytes` generate a safety bytes
-    pub fn gen_bytes(len: usize) -> Vec<u8> {
+    pub fn gen_bytes(len: usize) -> SafeBytes {
         let mut buf = vec![0u8; len];
         getrandom(&mut buf).expect("Failed to generate random bytes");
-        buf
+        SafeBytes { data: buf }
     }
 
     /// `gen_secret` generate a 32-bytes secret
-    pub fn gen_secret() -> Vec<u8> {
+    pub fn gen_secret() -> SafeBytes {
         Self::gen_bytes(32)
     }
 
     /// `gen_nonce` generate a 12-bytes nonce
-    pub fn gen_nonce() -> Vec<u8> {
+    pub fn gen_nonce() -> SafeBytes {
         Self::gen_bytes(12)
     }
 }
@@ -70,5 +91,5 @@ fn nanoid_test() {
 #[test]
 fn safety_test() {
     let result = SafeRandom::gen_nonce();
-    println!("safety: {:?}", result);
+    println!("safety: {:?}", result.raw());
 }
