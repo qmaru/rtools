@@ -1,4 +1,4 @@
-use data_encoding::{Specification, BASE32, BASE64};
+use data_encoding::{Specification, BASE32, BASE64, HEXLOWER};
 use sqids::Sqids;
 use wasm_bindgen::prelude::*;
 
@@ -48,6 +48,17 @@ impl DataEncoding {
     pub fn decode32_nopad(content: &str) -> String {
         let enc = DataEncoding::base32_nopad();
         let bytes = enc.decode(content.as_bytes()).unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    /// `encode_hex` encode hex string
+    pub fn encode_hex(content: &str) -> String {
+        HEXLOWER.encode(content.as_bytes())
+    }
+
+    /// `decode_hex` encode hex string
+    pub fn decode_hex(content: &str) -> String {
+        let bytes = HEXLOWER.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
     }
 }

@@ -1,8 +1,9 @@
-use data_encoding::{BASE32, BASE64, HEXLOWER};
+use crate::tools::parse::DataEncoding;
 use getrandom::getrandom;
 use nanoid::nanoid;
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
+use String;
 
 #[wasm_bindgen]
 /// `UUID` uuid tools
@@ -46,15 +47,19 @@ impl SafeBytes {
     }
 
     pub fn to_base32(&self) -> String {
-        BASE32.encode(&self.data)
+        DataEncoding::encode32(&String::from_utf8_lossy(&self.data))
+    }
+
+    pub fn to_base32_nopad(&self) -> String {
+        DataEncoding::encode32_nopad(&String::from_utf8_lossy(&self.data))
     }
 
     pub fn to_base64(&self) -> String {
-        BASE64.encode(&self.data)
+        DataEncoding::encode64(&String::from_utf8_lossy(&self.data))
     }
 
     pub fn to_hex(&self) -> String {
-        HEXLOWER.encode(&self.data)
+        DataEncoding::encode_hex(&String::from_utf8_lossy(&self.data))
     }
 }
 
@@ -96,4 +101,7 @@ fn nanoid_test() {
 fn safety_test() {
     let result = SafeRandom::gen_nonce();
     println!("safety: {:?}", result.raw());
+    println!("safety: {:?}", result.to_base32());
+    println!("safety: {:?}", result.to_base64());
+    println!("safety: {:?}", result.to_hex());
 }
