@@ -77,6 +77,11 @@ impl SafeRandom {
         Self::gen_bytes(16)
     }
 
+    /// `gen_secret_20_bytes` generate a 20 bytes(160 bit) secret
+    pub fn gen_secret_20_bytes() -> SafeBytes {
+        Self::gen_bytes(20)
+    }
+
     /// `gen_secret_32_bytes` generate a 32 bytes(256 bit) secret
     pub fn gen_secret_32_bytes() -> SafeBytes {
         Self::gen_bytes(32)
