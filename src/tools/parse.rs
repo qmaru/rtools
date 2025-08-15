@@ -1,4 +1,5 @@
 use data_encoding::{Specification, BASE32, BASE64, HEXLOWER};
+use idna::{domain_to_ascii, domain_to_unicode};
 use sqids::Sqids;
 use wasm_bindgen::prelude::*;
 
@@ -103,6 +104,20 @@ impl DataEncoding {
     pub fn decode_hex_bytes(content: &str) -> Vec<u8> {
         HEXLOWER.decode(content.as_bytes()).unwrap_or_default()
     }
+
+    /// `encode_punycode` encode domain
+    pub fn encode_punycode(domain: &str) -> String {
+        domain_to_ascii(domain).unwrap_or_default()
+    }
+
+    /// `decode_punycode` decode domain
+    pub fn decode_punycode(domain: &str) -> String {
+        let (result, err) = domain_to_unicode(domain);
+        match err {
+            Ok(()) => result,
+            Err(_) => String::new(),
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -198,6 +213,20 @@ fn b32_encode_test() {
     println!("base32 encode no-padding: {:?}", result2);
     assert_eq!("4S62BZNFXUWCA53POJWGI===", result1);
     assert_eq!("4S62BZNFXUWCA53POJWGI", result2);
+}
+
+#[test]
+fn punycode_encode_test() {
+    let result = DataEncoding::encode_punycode("https://www.谷歌.com");
+    println!("punycode encode: {:?}", result);
+    assert_eq!("https://www.xn--flw351e.com", result);
+}
+
+#[test]
+fn punycode_decode_test() {
+    let result = DataEncoding::decode_punycode("https://www.xn--flw351e.com");
+    println!("punycode decode: {:?}", result);
+    assert_eq!("https://www.谷歌.com", result);
 }
 
 #[test]
