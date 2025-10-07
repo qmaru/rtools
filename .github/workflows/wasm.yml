@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup wasm-pack
-        uses: qmaru/wasm-pack-action@v0.5.0
+        uses: qmaru/wasm-pack-action@v0.5.2
         with:
           version: latest
 
