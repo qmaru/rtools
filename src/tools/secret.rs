@@ -1,6 +1,6 @@
 use chacha20poly1305::{
-    aead::{Aead, KeyInit},
     ChaCha20Poly1305, Key, Nonce, XChaCha20Poly1305, XNonce,
+    aead::{Aead, KeyInit},
 };
 use data_encoding::BASE64;
 
@@ -10,10 +10,10 @@ fn decode_key(key_b64: &str) -> Result<Key, String> {
     let key_bytes = BASE64
         .decode(key_b64.as_bytes())
         .map_err(|_| "error: invalid base64 key")?;
-    if key_bytes.len() != 32 {
-        return Err("error: key length must be 32 bytes".into());
-    }
-    Ok(*Key::from_slice(&key_bytes))
+    let key_array: [u8; 32] = key_bytes
+        .try_into()
+        .map_err(|_| "error: key length must be 32 bytes")?;
+    Ok(key_array.into())
 }
 
 fn decode_nonce(nonce_b64: &str, expected_len: usize) -> Result<Vec<u8>, String> {
@@ -53,8 +53,12 @@ impl Secret {
         };
 
         let cipher = XChaCha20Poly1305::new(&key);
-        let nonce = XNonce::from_slice(&nonce_bytes);
-        match cipher.encrypt(nonce, plaintext.as_bytes()) {
+        let nonce_array: [u8; 24] = match nonce_bytes.try_into() {
+            Ok(arr) => arr,
+            Err(_) => return None,
+        };
+        let nonce = XNonce::from(nonce_array);
+        match cipher.encrypt(&nonce, plaintext.as_bytes()) {
             Ok(ct) => Some(BASE64.encode(&ct)),
             Err(_) => return None,
         }
@@ -76,9 +80,13 @@ impl Secret {
         };
 
         let cipher = XChaCha20Poly1305::new(&key);
-        let nonce = XNonce::from_slice(&nonce_bytes);
+        let nonce_array: [u8; 24] = match nonce_bytes.try_into() {
+            Ok(arr) => arr,
+            Err(_) => return None,
+        };
+        let nonce = XNonce::from(nonce_array);
 
-        match cipher.decrypt(nonce, ciphertext.as_ref()) {
+        match cipher.decrypt(&nonce, ciphertext.as_ref()) {
             Ok(pt) => match String::from_utf8(pt) {
                 Ok(s) => Some(s),
                 Err(_) => return None,
@@ -98,9 +106,13 @@ impl Secret {
             Err(_) => return None,
         };
         let cipher = ChaCha20Poly1305::new(&key);
-        let nonce = Nonce::from_slice(&nonce_bytes);
+        let nonce_array: [u8; 12] = match nonce_bytes.try_into() {
+            Ok(arr) => arr,
+            Err(_) => return None,
+        };
+        let nonce = Nonce::from(nonce_array);
 
-        match cipher.encrypt(nonce, plaintext.as_bytes()) {
+        match cipher.encrypt(&nonce, plaintext.as_bytes()) {
             Ok(ct) => Some(BASE64.encode(&ct)),
             Err(_) => return None,
         }
@@ -122,8 +134,12 @@ impl Secret {
         };
 
         let cipher = ChaCha20Poly1305::new(&key);
-        let nonce = Nonce::from_slice(&nonce_bytes);
-        match cipher.decrypt(nonce, ciphertext.as_ref()) {
+        let nonce_array: [u8; 12] = match nonce_bytes.try_into() {
+            Ok(arr) => arr,
+            Err(_) => return None,
+        };
+        let nonce = Nonce::from(nonce_array);
+        match cipher.decrypt(&nonce, ciphertext.as_ref()) {
             Ok(pt) => match String::from_utf8(pt) {
                 Ok(s) => Some(s),
                 Err(_) => return None,

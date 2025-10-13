@@ -1,9 +1,9 @@
 use crate::tools::parse::DataEncoding;
+use String;
 use getrandom::getrandom;
 use nanoid::nanoid;
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
-use String;
 
 #[wasm_bindgen]
 /// `UUID` uuid tools

@@ -1,4 +1,4 @@
-use data_encoding::{Specification, BASE32, BASE64, HEXLOWER};
+use data_encoding::{BASE32, BASE64, HEXLOWER, Specification};
 use idna::{domain_to_ascii, domain_to_unicode};
 use sqids::Sqids;
 use wasm_bindgen::prelude::*;

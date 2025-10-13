@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 
 use data_encoding::BASE64;
-use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng, Rng, RngCore};
+use rand::{Rng, RngCore, rngs::ThreadRng, seq::SliceRandom, thread_rng};
 
 const UPPERCASE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWERCASE: &str = "abcdefghijklmnopqrstuvwxyz";
