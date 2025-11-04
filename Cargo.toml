@@ -1,6 +1,6 @@
 [package]
 name = "rtools"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2024"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
@@ -30,6 +30,7 @@ chacha20poly1305 = "0.10.1"
 hkdf = "0.12.4"
 data-encoding = "2.9.0"
 idna = "1.1.0"
+qrcodegen = "1.8.0"
 
 [lib]
 crate-type = ["cdylib"]
