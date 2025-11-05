@@ -555,10 +555,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "qrcodegen"
-version = "1.8.0"
+name = "qrcode"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4339fc7a1021c9c1621d87f5e3505f2805c8c105420ba2f2a4df86814590c142"
+checksum = "d68782463e408eb1e668cf6152704bd856c78c5b6417adaee3203d8f4c1fc9ec"
 
 [[package]]
 name = "quote"
@@ -621,7 +621,7 @@ dependencies = [
 
 [[package]]
 name = "rtools"
-version = "1.2.1"
+version = "1.3.0"
 dependencies = [
  "blake2",
  "blake3",
@@ -636,7 +636,7 @@ dependencies = [
  "nanoid",
  "otpauth",
  "pinyin",
- "qrcodegen",
+ "qrcode",
  "rand",
  "sha2",
  "sha3",

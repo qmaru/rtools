@@ -1,8 +1,8 @@
-use qrcodegen::QrCode;
-use qrcodegen::QrCodeEcc;
+use qrcode::{EcLevel, QrCode, Version};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
+#[derive(Clone, Copy)]
 /// Error correction level for QR code
 pub enum QrEccLevel {
     /// Low - 7% of codewords can be restored
@@ -16,104 +16,215 @@ pub enum QrEccLevel {
 }
 
 impl QrEccLevel {
-    fn to_qrcodegen_ecc(&self) -> QrCodeEcc {
+    fn to_ecc(&self) -> EcLevel {
         match self {
-            QrEccLevel::Low => QrCodeEcc::Low,
-            QrEccLevel::Medium => QrCodeEcc::Medium,
-            QrEccLevel::Quartile => QrCodeEcc::Quartile,
-            QrEccLevel::High => QrCodeEcc::High,
+            QrEccLevel::Low => EcLevel::L,
+            QrEccLevel::Medium => EcLevel::M,
+            QrEccLevel::Quartile => EcLevel::Q,
+            QrEccLevel::High => EcLevel::H,
+        }
+    }
+}
+
+#[wasm_bindgen]
+#[derive(Clone, Copy)]
+/// QR code version
+pub enum QrVersion {
+    /// Micro QR version 1
+    Micro1 = 1,
+    /// Micro QR version 2
+    Micro2 = 2,
+    /// Micro QR version 3
+    Micro3 = 3,
+    /// Micro QR version 4
+    Micro4 = 4,
+    /// Normal QR version 1
+    Normal1 = 10,
+    /// Normal QR version 5
+    Normal5 = 15,
+    /// Normal QR version 10
+    Normal10 = 20,
+    /// Normal QR version 15
+    Normal15 = 25,
+    /// Normal QR version 20
+    Normal20 = 30,
+    /// Normal QR version 30
+    Normal30 = 40,
+    /// Normal QR version 40
+    Normal40 = 50,
+}
+
+impl QrVersion {
+    fn to_version(&self) -> Version {
+        match self {
+            QrVersion::Micro1 => Version::Micro(1),
+            QrVersion::Micro2 => Version::Micro(2),
+            QrVersion::Micro3 => Version::Micro(3),
+            QrVersion::Micro4 => Version::Micro(4),
+            QrVersion::Normal1 => Version::Normal(1),
+            QrVersion::Normal5 => Version::Normal(5),
+            QrVersion::Normal10 => Version::Normal(10),
+            QrVersion::Normal15 => Version::Normal(15),
+            QrVersion::Normal20 => Version::Normal(20),
+            QrVersion::Normal30 => Version::Normal(30),
+            QrVersion::Normal40 => Version::Normal(40),
         }
     }
 }
 
 #[wasm_bindgen]
 /// `QRCode` QR code generator
-pub struct QRCode {
-    qr: QrCode,
-}
-
-impl std::fmt::Debug for QRCode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("QRCode")
-            .field("size", &self.qr.size())
-            .finish()
-    }
-}
+pub struct QRCode {}
 
 #[wasm_bindgen]
 impl QRCode {
-    /// Create a new QR code from data
-    #[wasm_bindgen(constructor)]
-    pub fn new(data: &str, ecc_level: u8) -> Result<QRCode, String> {
-        let ecc = match ecc_level {
-            0 => QrEccLevel::Low,
-            1 => QrEccLevel::Medium,
-            2 => QrEccLevel::Quartile,
-            3 => QrEccLevel::High,
-            _ => return Err("Invalid error correction level. Use 0-3.".to_string()),
-        };
-
-        let qr = QrCode::encode_text(data, ecc.to_qrcodegen_ecc())
-            .map_err(|e| format!("Failed to encode QR code: {:?}", e))?;
-
-        Ok(QRCode { qr })
+    /// `generate_manual` Generate a QR code with the specified data, version, and error correction level
+    fn generate_manual(
+        data: &str,
+        version: QrVersion,
+        ec_level: QrEccLevel,
+    ) -> Result<QrCode, JsValue> {
+        QrCode::with_version(data, version.to_version(), ec_level.to_ecc())
+            .map_err(|e| JsValue::from_str(&format!("QR code error: {}", e)))
     }
 
-    /// Get the size of the QR code
-    pub fn size(&self) -> i32 {
-        self.qr.size()
+    /// `generate_auto_version` Generate a QR code with the specified data and error correction level
+    fn generate_auto_version(data: &str, ec_level: QrEccLevel) -> Result<QrCode, JsValue> {
+        QrCode::with_error_correction_level(data, ec_level.to_ecc())
+            .map_err(|e| JsValue::from_str(&format!("QR code error: {}", e)))
     }
 
-    /// Get module value at position (x, y)
-    pub fn get_module(&self, x: i32, y: i32) -> bool {
-        self.qr.get_module(x, y)
-    }
+    /// `to_raw_bytes` Convert QrCode to raw byte format
+    ///
+    /// ### Arguments
+    /// * `code` - The QrCode object
+    ///
+    /// ### Returns
+    /// Vec<u8> with format: [width, is_micro, module_data...]
+    fn to_raw_bytes(code: &QrCode) -> Vec<u8> {
+        let width = code.width() as u8;
+        let is_micro = code.version().is_micro();
+        let mut bytes = vec![width, if is_micro { 1 } else { 0 }];
 
-    /// Generate SVG string
-    pub fn to_svg(&self, border: u32) -> String {
-        let size = self.qr.size() as i32;
-        let svg_size = size + (border as i32 * 2);
+        let total_modules = code.width() * code.width();
+        let packed_size = (total_modules + 7) / 8;
+        let mut packed_data = vec![0u8; packed_size];
 
-        let mut svg = String::new();
-        svg.push_str(&format!(
-            r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {} {}" stroke="none">"#,
-            svg_size, svg_size
-        ));
-        svg.push_str("\n  <rect width=\"100%\" height=\"100%\" fill=\"#ffffff\"/>\n  <path fill=\"#000000\" d=\"");
-
-        for y in 0..size {
-            for x in 0..size {
-                if self.qr.get_module(x, y) {
-                    let px = x + border as i32;
-                    let py = y + border as i32;
-                    svg.push_str(&format!("M{},{}h1v1h-1z", px, py));
+        for y in 0..code.width() {
+            for x in 0..code.width() {
+                let idx = y * code.width() + x;
+                if code[(x, y)] == qrcode::Color::Dark {
+                    packed_data[idx / 8] |= 1 << (7 - (idx % 8));
                 }
             }
         }
-
-        svg.push_str("\"/>\n</svg>");
-        svg
+        bytes.extend(packed_data);
+        bytes
     }
 
-    /// Generate QR code with default settings (static method)
-    pub fn generate(data: &str) -> Result<String, String> {
-        let qr = Self::new(data, 1)?;
-        Ok(qr.to_svg(4))
+    /// `to_text_string` Convert QrCode to text string format
+    ///
+    /// ### Arguments
+    /// * `code` - The QrCode object
+    ///
+    /// ### Returns
+    /// String containing ASCII art representation of QR code
+    fn to_text_string(code: &QrCode) -> String {
+        code.render::<char>()
+            .quiet_zone(false)
+            .module_dimensions(2, 1)
+            .build()
+    }
+
+    /// `raw` Generate raw QR code data with custom version and error correction level
+    ///
+    /// ### Arguments
+    /// * `data` - The data to encode
+    /// * `version` - QR code version (Micro1-Micro4 or Normal1-Normal40)
+    /// * `ec_level` - Error correction level (Low, Medium, Quartile, High)
+    ///
+    /// ### Returns
+    /// Vec<u8> with format: [width, is_micro, module_data...]
+    pub fn raw(data: &str, version: QrVersion, ec_level: QrEccLevel) -> Result<Vec<u8>, JsValue> {
+        let code: QrCode = Self::generate_manual(data, version, ec_level)?;
+        Ok(Self::to_raw_bytes(&code))
+    }
+
+    /// `raw_auto` Generate raw QR code data with error correction level
+    ///
+    /// ### Arguments
+    /// * `data` - The data to encode
+    /// * `ec_level` - Error correction level (Low, Medium, Quartile, High)
+    ///
+    /// ### Returns
+    /// Vec<u8> with format: [width, is_micro, module_data...]
+    pub fn raw_auto(data: &str, ec_level: QrEccLevel) -> Result<Vec<u8>, JsValue> {
+        let code = Self::generate_auto_version(data, ec_level)?;
+        Ok(Self::to_raw_bytes(&code))
+    }
+
+    /// `raw_default` Generate raw QR code data with default settings
+    ///
+    /// ### Arguments
+    /// * `data` - The data to encode
+    ///
+    /// ### Returns
+    /// Vec<u8> with format: [width, is_micro, module_data...]
+    pub fn raw_default(data: &str) -> Result<Vec<u8>, JsValue> {
+        Self::raw_auto(data, QrEccLevel::Medium)
+    }
+
+    /// `text` Generate QR code to string format with custom version and error correction level
+    ///
+    /// ### Arguments
+    /// * `data` - The data to encode
+    /// * `version` - QR code version (Micro1-Micro4 or Normal1-Normal40)
+    /// * `ec_level` - Error correction level (Low, Medium, Quartile, High)
+    ///
+    /// ### Returns
+    /// String containing ASCII art representation of QR code (character-based rendering)
+    pub fn text(data: &str, version: QrVersion, ec_level: QrEccLevel) -> Result<String, JsValue> {
+        let code = Self::generate_manual(data, version, ec_level)?;
+        Ok(Self::to_text_string(&code))
+    }
+
+    /// `text_auto` Generate QR code to string format with error correction level
+    ///
+    /// ### Arguments
+    /// * `data` - The data to encode
+    /// * `ec_level` - Error correction level (Low, Medium, Quartile, High)
+    ///
+    /// ### Returns
+    /// String containing ASCII art representation of QR code (character-based rendering)
+    pub fn text_auto(data: &str, ec_level: QrEccLevel) -> Result<String, JsValue> {
+        let code = Self::generate_auto_version(data, ec_level)?;
+        Ok(Self::to_text_string(&code))
+    }
+
+    /// `text_default` Generate QR code to string format with default settings
+    ///
+    /// ### Arguments
+    /// * `data` - The data to encode
+    ///
+    /// ### Returns
+    /// String containing ASCII art representation of QR code (character-based rendering)
+    pub fn text_default(data: &str) -> Result<String, JsValue> {
+        Self::text_auto(data, QrEccLevel::Medium)
     }
 }
 
 #[test]
-fn qrcode_test() {
-    let data = "https://github.com";
+fn qrcode_with_version_test() {
+    let data = "hello, world!";
 
-    // Test instance API
-    let qr = QRCode::new(data, 1).unwrap();
-    println!("{:?}", qr);
+    let qr_raw = QRCode::raw_default(data).unwrap();
+    println!(
+        "QR raw default: width={}, is_micro={}",
+        qr_raw[0], qr_raw[1]
+    );
+    assert!(qr_raw.len() > 2);
 
-    let svg = qr.to_svg(4);
-    assert!(svg.contains("<svg"));
-
-    // Test static API
-    let svg = QRCode::generate(data).unwrap();
-    assert!(svg.contains("<svg"));
+    let qr_text = QRCode::text_default(data).unwrap();
+    println!("QR text default: {}", qr_text);
+    assert!(qr_text.len() > 2);
 }
