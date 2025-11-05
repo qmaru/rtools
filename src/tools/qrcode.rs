@@ -1,4 +1,5 @@
 use qrcode::{EcLevel, QrCode, Version};
+use rqrr;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -265,10 +266,50 @@ impl QRCode {
     pub fn text_default(data: &str) -> Result<String, JsValue> {
         Self::text_auto(data, QrEccLevel::Medium)
     }
+
+    /// `decode_luma` Decode QR code from grayscale image data
+    ///
+    /// ### Arguments
+    /// * `gray_bytes` - Grayscale pixel data (0-255, where 0 is black and 255 is white)
+    /// * `width` - Image width in pixels
+    /// * `height` - Image height in pixels
+    ///
+    /// ### Returns
+    /// Vec<String> containing decoded QR code contents
+    pub fn decode_luma(gray_bytes: &[u8], width: u32, height: u32) -> Result<Vec<String>, JsValue> {
+        let width_usize = width as usize;
+        let height_usize = height as usize;
+
+        // Validate input
+        if gray_bytes.len() != width_usize * height_usize {
+            return Err(JsValue::from_str(
+                "gray_bytes length does not match width * height",
+            ));
+        }
+
+        let mut prepared =
+            rqrr::PreparedImage::prepare_from_greyscale(width_usize, height_usize, {
+                let mut idx = 0;
+                move |_x, _y| {
+                    let val = gray_bytes[idx];
+                    idx += 1;
+                    val
+                }
+            });
+
+        let grids = prepared.detect_grids();
+        let mut results = Vec::new();
+        for grid in grids {
+            if let Ok((_meta, content)) = grid.decode() {
+                results.push(content);
+            }
+        }
+        Ok(results)
+    }
 }
 
 #[test]
-fn qrcode_with_version_test() {
+fn qrcode_encode_test() {
     let data = "hello, world!";
 
     // raw packed
@@ -295,4 +336,30 @@ fn qrcode_with_version_test() {
     let qr_text = QRCode::text_default(data).unwrap();
     println!("QR text default: {}", qr_text);
     assert!(qr_text.len() > 2);
+}
+
+#[test]
+fn qrcode_decode_test() {
+    let data = "https://github.com";
+
+    let qr_raw = QRCode::raw_default_unpacked(data).unwrap();
+    let width = qr_raw[0] as u32;
+    let is_micro = qr_raw[1];
+    let modules = &qr_raw[2..];
+
+    println!("Generated QR code: width={}, is_micro={}", width, is_micro);
+
+    let mut gray_bytes = vec![0u8; (width as usize) * (width as usize)];
+    for (idx, &module) in modules.iter().enumerate() {
+        gray_bytes[idx] = if module == 1 { 0 } else { 255 };
+    }
+
+    let decoded = QRCode::decode_luma(&gray_bytes, width, width).unwrap();
+
+    println!("Decoded QR codes: {:?}", decoded);
+    assert!(!decoded.is_empty(), "Should decode at least one QR code");
+    assert_eq!(
+        decoded[0], data,
+        "Decoded content should match original data"
+    );
 }
