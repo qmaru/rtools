@@ -94,14 +94,14 @@ impl QRCode {
             .map_err(|e| JsValue::from_str(&format!("QR code error: {}", e)))
     }
 
-    /// `to_raw_bytes` Convert QrCode to raw byte format
+    /// `to_raw_bytes_packed` Convert QrCode to raw byte format
     ///
     /// ### Arguments
     /// * `code` - The QrCode object
     ///
     /// ### Returns
     /// Vec<u8> with format: [width, is_micro, module_data...]
-    fn to_raw_bytes(code: &QrCode) -> Vec<u8> {
+    fn to_raw_bytes_packed(code: &QrCode) -> Vec<u8> {
         let width = code.width() as u8;
         let is_micro = code.version().is_micro();
         let mut bytes = vec![width, if is_micro { 1 } else { 0 }];
@@ -119,6 +119,31 @@ impl QRCode {
             }
         }
         bytes.extend(packed_data);
+        bytes
+    }
+
+    /// `to_raw_bytes_unpacked` Convert QrCode to uncompressed raw byte format
+    ///
+    /// ### Arguments
+    /// * `code` - The QrCode object
+    ///
+    /// ### Returns
+    /// Vec<u8> with format: [width, is_micro, module_data...] where each module is one byte (0 = light, 1 = dark)
+    fn to_raw_bytes_unpacked(code: &QrCode) -> Vec<u8> {
+        let width = code.width() as u8;
+        let is_micro = code.version().is_micro();
+        let mut bytes = vec![width, if is_micro { 1 } else { 0 }];
+
+        for y in 0..code.width() {
+            for x in 0..code.width() {
+                let v = if code[(x, y)] == qrcode::Color::Dark {
+                    1u8
+                } else {
+                    0u8
+                };
+                bytes.push(v);
+            }
+        }
         bytes
     }
 
@@ -147,7 +172,7 @@ impl QRCode {
     /// Vec<u8> with format: [width, is_micro, module_data...]
     pub fn raw(data: &str, version: QrVersion, ec_level: QrEccLevel) -> Result<Vec<u8>, JsValue> {
         let code: QrCode = Self::generate_manual(data, version, ec_level)?;
-        Ok(Self::to_raw_bytes(&code))
+        Ok(Self::to_raw_bytes_packed(&code))
     }
 
     /// `raw_auto` Generate raw QR code data with error correction level
@@ -160,7 +185,7 @@ impl QRCode {
     /// Vec<u8> with format: [width, is_micro, module_data...]
     pub fn raw_auto(data: &str, ec_level: QrEccLevel) -> Result<Vec<u8>, JsValue> {
         let code = Self::generate_auto_version(data, ec_level)?;
-        Ok(Self::to_raw_bytes(&code))
+        Ok(Self::to_raw_bytes_packed(&code))
     }
 
     /// `raw_default` Generate raw QR code data with default settings
@@ -172,6 +197,35 @@ impl QRCode {
     /// Vec<u8> with format: [width, is_micro, module_data...]
     pub fn raw_default(data: &str) -> Result<Vec<u8>, JsValue> {
         Self::raw_auto(data, QrEccLevel::Medium)
+    }
+
+    /// `raw_unpacked` Generate uncompressed raw QR code data with custom version and error correction level
+    ///
+    /// ### Arguments
+    /// * `data` - The data to encode
+    /// * `version` - QR code version (Micro1-Micro4 or Normal1-Normal40)
+    /// * `ec_level` - Error correction level (Low, Medium, Quartile, High)
+    ///
+    /// ### Returns
+    /// Vec<u8> with format: [width, is_micro, module_data...] (each module one byte)
+    pub fn raw_unpacked(
+        data: &str,
+        version: QrVersion,
+        ec_level: QrEccLevel,
+    ) -> Result<Vec<u8>, JsValue> {
+        let code: QrCode = Self::generate_manual(data, version, ec_level)?;
+        Ok(Self::to_raw_bytes_unpacked(&code))
+    }
+
+    /// `raw_auto_unpacked` Generate uncompressed raw QR code data with error correction level
+    pub fn raw_auto_unpacked(data: &str, ec_level: QrEccLevel) -> Result<Vec<u8>, JsValue> {
+        let code = Self::generate_auto_version(data, ec_level)?;
+        Ok(Self::to_raw_bytes_unpacked(&code))
+    }
+
+    /// `raw_default_unpacked` Generate uncompressed raw QR code data with default settings
+    pub fn raw_default_unpacked(data: &str) -> Result<Vec<u8>, JsValue> {
+        Self::raw_auto_unpacked(data, QrEccLevel::Medium)
     }
 
     /// `text` Generate QR code to string format with custom version and error correction level
@@ -217,13 +271,27 @@ impl QRCode {
 fn qrcode_with_version_test() {
     let data = "hello, world!";
 
+    // raw packed
     let qr_raw = QRCode::raw_default(data).unwrap();
     println!(
-        "QR raw default: width={}, is_micro={}",
-        qr_raw[0], qr_raw[1]
+        "QR raw default: width={}, is_micro={}, modules={:?}",
+        qr_raw[0],
+        qr_raw[1],
+        &qr_raw[2..10]
     );
     assert!(qr_raw.len() > 2);
 
+    // raw unpacked
+    let qr_raw_unpacked = QRCode::raw_default_unpacked(data).unwrap();
+    println!(
+        "QR raw unpacked default: width={}, is_micro={}, modules={:?}",
+        qr_raw_unpacked[0],
+        qr_raw_unpacked[1],
+        &qr_raw_unpacked[2..10]
+    );
+    assert!(qr_raw_unpacked.len() > 2);
+
+    // text
     let qr_text = QRCode::text_default(data).unwrap();
     println!("QR text default: {}", qr_text);
     assert!(qr_text.len() > 2);
