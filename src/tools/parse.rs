@@ -1,4 +1,4 @@
-use data_encoding::{BASE32, BASE64, HEXLOWER, Specification};
+use data_encoding::{BASE32, BASE32_NOPAD, BASE64, BASE64_NOPAD, HEXLOWER};
 use idna::{domain_to_ascii, domain_to_unicode};
 use sqids::Sqids;
 use wasm_bindgen::prelude::*;
@@ -9,79 +9,88 @@ pub struct DataEncoding {}
 
 #[wasm_bindgen]
 impl DataEncoding {
-    fn base32_nopad() -> data_encoding::Encoding {
-        let mut spec = Specification::new();
-        spec.symbols.push_str("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567");
-        spec.bit_order = data_encoding::BitOrder::MostSignificantFirst;
-        spec.padding = None;
-        spec.encoding().unwrap()
-    }
-
-    /// `encode64` encode content to base64
+    /// `encode64` encode string to base64
     pub fn encode64(content: &str) -> String {
         BASE64.encode(content.as_bytes())
     }
 
-    /// `decode64` decode base64 string
+    /// `decode64` decode string from base64
     pub fn decode64(content: &str) -> String {
         let bytes = BASE64.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
     }
 
-    /// `encode64_bytes` decode base64 bytes
+    /// `encode64_nopad` encode string to base64 no-padding
+    pub fn encode64_nopad(content: &str) -> String {
+        BASE64_NOPAD.encode(content.as_bytes())
+    }
+
+    /// `decode64_nopad` decode string from base64 no-padding
+    pub fn decode64_nopad(content: &str) -> String {
+        let bytes = BASE64_NOPAD.decode(content.as_bytes()).unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    /// `encode64_bytes` encode bytes to base64
     pub fn encode64_bytes(content: &[u8]) -> String {
         BASE64.encode(content)
     }
 
-    /// `decode64_bytes` decode base64 bytes
+    /// `decode64_bytes` decode bytes from base64
     pub fn decode64_bytes(content: &str) -> Vec<u8> {
         BASE64.decode(content.as_bytes()).unwrap_or_default()
     }
 
-    /// `encode32` encode content to base32
+    /// `encode64_nopad_bytes` encode bytes to base64 no-padding
+    pub fn encode64_nopad_bytes(content: &[u8]) -> String {
+        BASE64_NOPAD.encode(content)
+    }
+
+    /// `decode64_nopad_bytes` decode bytes from base64 no-padding
+    pub fn decode64_nopad_bytes(content: &str) -> Vec<u8> {
+        BASE64_NOPAD.decode(content.as_bytes()).unwrap_or_default()
+    }
+
+    /// `encode32` encode string to base32
     pub fn encode32(content: &str) -> String {
         BASE32.encode(content.as_bytes())
     }
 
-    /// `decode32` decode base32 string
+    /// `decode32` decode string from base32
     pub fn decode32(content: &str) -> String {
         let bytes = BASE32.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
     }
 
-    /// `encode32_nopad` encode content to base32 no-padding
+    /// `encode32_nopad` encode string to base32 no-padding
     pub fn encode32_nopad(content: &str) -> String {
-        let enc = DataEncoding::base32_nopad();
-        enc.encode(content.as_bytes())
+        BASE32_NOPAD.encode(content.as_bytes())
     }
 
-    /// `decode32_nopad` decode base32 no-padding string
+    /// `decode32_nopad` decode string from base32 no-padding
     pub fn decode32_nopad(content: &str) -> String {
-        let enc = DataEncoding::base32_nopad();
-        let bytes = enc.decode(content.as_bytes()).unwrap_or_default();
+        let bytes = BASE32_NOPAD.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
     }
 
-    /// `encode32_bytes` encode content to base32 bytes
+    /// `encode32_bytes` encode bytes to base32
     pub fn encode32_bytes(content: &[u8]) -> String {
         BASE32.encode(content)
     }
 
-    /// `decode32_bytes` decode base32 bytes
+    /// `decode32_bytes` decode bytes from base32
     pub fn decode32_bytes(content: &str) -> Vec<u8> {
         BASE32.decode(content.as_bytes()).unwrap_or_default()
     }
 
-    /// `encode32_nopad_bytes` encode content to base32 no-padding bytes
+    /// `encode32_nopad_bytes` encode base32 no-padding bytes
     pub fn encode32_nopad_bytes(content: &[u8]) -> String {
-        let enc = DataEncoding::base32_nopad();
-        enc.encode(content)
+        BASE32_NOPAD.encode(content)
     }
 
     /// `decode32_nopad_bytes` decode base32 no-padding bytes
     pub fn decode32_nopad_bytes(content: &str) -> Vec<u8> {
-        let enc = DataEncoding::base32_nopad();
-        enc.decode(content.as_bytes()).unwrap_or_default()
+        BASE32_NOPAD.decode(content.as_bytes()).unwrap_or_default()
     }
 
     /// `encode_hex` encode hex string
@@ -89,7 +98,7 @@ impl DataEncoding {
         HEXLOWER.encode(content.as_bytes())
     }
 
-    /// `decode_hex` encode hex string
+    /// `decode_hex` decode hex string
     pub fn decode_hex(content: &str) -> String {
         let bytes = HEXLOWER.decode(content.as_bytes()).unwrap_or_default();
         String::from_utf8(bytes).unwrap_or_default()
@@ -100,7 +109,7 @@ impl DataEncoding {
         HEXLOWER.encode(content)
     }
 
-    /// `decode_hex_bytes` encode hex bytes
+    /// `decode_hex_bytes` decode hex bytes
     pub fn decode_hex_bytes(content: &str) -> Vec<u8> {
         HEXLOWER.decode(content.as_bytes()).unwrap_or_default()
     }
@@ -171,10 +180,10 @@ impl SqIDs {
                 let string_numbers: Vec<String> =
                     numbers.iter().map(|&num| num.to_string()).collect();
 
-                if string_numbers.len() != 0 {
+                if !string_numbers.is_empty() {
                     return Some(string_numbers.join(""));
                 }
-                return None;
+                None
             }
             Err(_) => None,
         }
@@ -196,13 +205,39 @@ fn b64_decode_test() {
 }
 
 #[test]
-fn b32_decode_test() {
-    let result1: String = DataEncoding::decode32("4S62BZNFXUWCA53POJWGI===");
-    let result2: String = DataEncoding::decode32_nopad("4S62BZNFXUWCA53POJWGI");
-    println!("base32 decode: {:?}", result1);
-    println!("base32 decode no-padding: {:?}", result2);
-    assert_eq!("你好, world", result1);
-    assert_eq!("你好, world", result2);
+fn b64_nopad_encode_test() {
+    let result = DataEncoding::encode64_nopad("你好, world");
+    println!("base64 no-padding encode: {:?}", result);
+    assert_eq!("5L2g5aW9LCB3b3JsZA", result);
+}
+
+#[test]
+fn b64_nopad_decode_test() {
+    let result = DataEncoding::decode64_nopad("5L2g5aW9LCB3b3JsZA");
+    println!("base64 no-padding decode: {:?}", result);
+    assert_eq!("你好, world", result);
+}
+
+#[test]
+fn b64_bytes_test() {
+    let bytes = "你好, world".as_bytes();
+    let encoded = DataEncoding::encode64_bytes(bytes);
+    println!("base64 encode bytes: {:?}", encoded);
+    assert_eq!("5L2g5aW9LCB3b3JsZA==", encoded);
+
+    let decoded = DataEncoding::decode64_bytes(&encoded);
+    assert_eq!(bytes, decoded.as_slice());
+}
+
+#[test]
+fn b64_nopad_bytes_test() {
+    let bytes = "你好, world".as_bytes();
+    let encoded = DataEncoding::encode64_nopad_bytes(bytes);
+    println!("base64 no-padding encode bytes: {:?}", encoded);
+    assert_eq!("5L2g5aW9LCB3b3JsZA", encoded);
+
+    let decoded = DataEncoding::decode64_nopad_bytes(&encoded);
+    assert_eq!(bytes, decoded.as_slice());
 }
 
 #[test]
@@ -213,6 +248,63 @@ fn b32_encode_test() {
     println!("base32 encode no-padding: {:?}", result2);
     assert_eq!("4S62BZNFXUWCA53POJWGI===", result1);
     assert_eq!("4S62BZNFXUWCA53POJWGI", result2);
+}
+
+#[test]
+fn b32_decode_test() {
+    let result1: String = DataEncoding::decode32("4S62BZNFXUWCA53POJWGI===");
+    let result2: String = DataEncoding::decode32_nopad("4S62BZNFXUWCA53POJWGI");
+    println!("base32 decode: {:?}", result1);
+    println!("base32 decode no-padding: {:?}", result2);
+    assert_eq!("你好, world", result1);
+    assert_eq!("你好, world", result2);
+}
+
+#[test]
+fn b32_bytes_test() {
+    let bytes = "你好, world".as_bytes();
+    let encoded = DataEncoding::encode32_bytes(bytes);
+    println!("base32 encode bytes: {:?}", encoded);
+    assert_eq!("4S62BZNFXUWCA53POJWGI===", encoded);
+
+    let decoded = DataEncoding::decode32_bytes(&encoded);
+    assert_eq!(bytes, decoded.as_slice());
+}
+
+#[test]
+fn b32_nopad_bytes_test() {
+    let bytes = "你好, world".as_bytes();
+    let encoded = DataEncoding::encode32_nopad_bytes(bytes);
+    println!("base32 no-padding encode bytes: {:?}", encoded);
+    assert_eq!("4S62BZNFXUWCA53POJWGI", encoded);
+
+    let decoded = DataEncoding::decode32_nopad_bytes(&encoded);
+    assert_eq!(bytes, decoded.as_slice());
+}
+
+#[test]
+fn hex_encode_test() {
+    let result = DataEncoding::encode_hex("你好, world");
+    println!("hex encode: {:?}", result);
+    assert_eq!("e4bda0e5a5bd2c20776f726c64", result);
+}
+
+#[test]
+fn hex_decode_test() {
+    let result = DataEncoding::decode_hex("e4bda0e5a5bd2c20776f726c64");
+    println!("hex decode: {:?}", result);
+    assert_eq!("你好, world", result);
+}
+
+#[test]
+fn hex_bytes_test() {
+    let bytes = "你好, world".as_bytes();
+    let encoded = DataEncoding::encode_hex_bytes(bytes);
+    println!("hex encode bytes: {:?}", encoded);
+    assert_eq!("e4bda0e5a5bd2c20776f726c64", encoded);
+
+    let decoded = DataEncoding::decode_hex_bytes(&encoded);
+    assert_eq!(bytes, decoded.as_slice());
 }
 
 #[test]

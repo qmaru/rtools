@@ -58,6 +58,10 @@ impl SafeBytes {
         DataEncoding::encode64_bytes(&self.data)
     }
 
+    pub fn to_base64_nopad(&self) -> String {
+        DataEncoding::encode64_nopad_bytes(&self.data)
+    }
+
     pub fn to_hex(&self) -> String {
         DataEncoding::encode_hex_bytes(&self.data)
     }
