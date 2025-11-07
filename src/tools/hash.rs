@@ -107,7 +107,7 @@ impl Hash {
         }
     }
 
-    /// `gen_hkdf` encode a hkdf base64
+    /// `gen_hkdf_b64` encode a hkdf base64
     pub fn gen_hkdf_b64(ikm: &[u8], salt: &[u8], info: &[u8], out_len: usize) -> Option<String> {
         let key = Hash::gen_hkdf(ikm, salt, info, out_len);
         if let Some(key) = key {

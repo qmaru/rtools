@@ -8,6 +8,7 @@ pub struct OTPAuth {}
 
 #[wasm_bindgen]
 impl OTPAuth {
+    /// `generate_code` generate TOTP code
     pub fn generate_code(secret: &str, timestamp: u64, period: u64) -> u32 {
         if let Some(totp) = TOTP::from_base32(secret) {
             totp.generate(period, timestamp)

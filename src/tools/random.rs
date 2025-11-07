@@ -2,6 +2,7 @@ use crate::tools::parse::DataEncoding;
 use String;
 use getrandom::getrandom;
 use nanoid::nanoid;
+use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 
@@ -15,6 +16,33 @@ impl UUID {
     pub fn v4() -> String {
         let id = Uuid::new_v4();
         id.to_string()
+    }
+
+    /// `v7` creates v7 UUIDs based on the given milliseconds since UNIX epoch
+    pub fn v7(ms: u64) -> String {
+        let seconds = ms / 1000;
+        let subsec_nanos = ((ms % 1000) * 1_000_000) as u32;
+        Uuid::new_v7(uuid::Timestamp::from_unix_time(
+            seconds,
+            subsec_nanos,
+            0,
+            12,
+        ))
+        .to_string()
+    }
+
+    /// `v7_now` creates v7 UUIDs based on the current system time
+    pub fn v7_now() -> String {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards");
+        Uuid::new_v7(uuid::Timestamp::from_unix_time(
+            now.as_secs(),
+            now.subsec_nanos(),
+            0,
+            12,
+        ))
+        .to_string()
     }
 }
 
@@ -42,26 +70,32 @@ pub struct SafeBytes {
 
 #[wasm_bindgen]
 impl SafeBytes {
+    /// `raw` get raw bytes
     pub fn raw(&self) -> Vec<u8> {
         self.data.clone()
     }
 
+    /// `to_base32` encode to base32 string
     pub fn to_base32(&self) -> String {
         DataEncoding::encode32_bytes(&self.data)
     }
 
+    /// `to_base32_nopad` encode to base32 no padding string
     pub fn to_base32_nopad(&self) -> String {
         DataEncoding::encode32_nopad_bytes(&self.data)
     }
 
+    /// `to_base64` encode to base64 string
     pub fn to_base64(&self) -> String {
         DataEncoding::encode64_bytes(&self.data)
     }
 
+    /// `to_base64_nopad` encode to base64 no padding string
     pub fn to_base64_nopad(&self) -> String {
         DataEncoding::encode64_nopad_bytes(&self.data)
     }
 
+    /// `to_hex` encode to hex string
     pub fn to_hex(&self) -> String {
         DataEncoding::encode_hex_bytes(&self.data)
     }
@@ -110,8 +144,19 @@ impl SafeRandom {
 #[test]
 fn uuid_v4_test() {
     let result = UUID::v4();
-    println!("UUID: {:?}", result);
+    println!("UUIDv4: {:?}", result);
     assert_ne!("", result)
+}
+
+#[test]
+fn uuid_v7_test() {
+    let result = UUID::v7(1762482616);
+    println!("UUIDv7: {:?}", result);
+    assert_ne!("", result);
+
+    let result = UUID::v7_now();
+    println!("UUIDv7 now: {:?}", result);
+    assert_ne!("", result);
 }
 
 #[test]
