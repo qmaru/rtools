@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        target: [bundler, web]
+        target: [bundler, web, nodejs]
 
     steps:
       - name: Checkout Repository
@@ -33,11 +33,15 @@ jobs:
         if: matrix.target == 'web'
         run: sed -i 's#name = "rtools"#name = "rtools-web"#g' Cargo.toml
 
+      - name: Rename package for nodejs (only for nodejs target)
+        if: matrix.target == 'nodejs'
+        run: sed -i 's#name = "rtools"#name = "rtools-node"#g' Cargo.toml
+
       - name: Build WASM (${{ matrix.target }} target)
         run: wasm-pack build -t ${{ matrix.target }} --release --scope ${{ github.repository_owner }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           registry-url: "https://npm.pkg.github.com"
