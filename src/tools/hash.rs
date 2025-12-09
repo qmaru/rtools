@@ -1,8 +1,9 @@
-use blake2::{Blake2b512, Blake2s256};
+use blake2::{Blake2b512, Blake2bMac512, Blake2s256};
 use blake3;
 use data_encoding::BASE64;
 use digest::Digest;
 use hkdf::Hkdf;
+use hmac::{Hmac, Mac};
 use md5::Md5;
 use murmur3::{murmur3_32, murmur3_x64_128};
 use sha2::Sha256;
@@ -116,6 +117,45 @@ impl Hash {
             None
         }
     }
+
+    /// `gen_hmac_sha256` encode a HMAC-SHA256 hash
+    pub fn gen_hmac_sha256(key: &[u8], message: &str) -> String {
+        type HmacSha256 = Hmac<Sha256>;
+        let mut mac = HmacSha256::new_from_slice(key).expect("HMAC can take key of any size");
+        mac.update(message.as_bytes());
+        let result = mac.finalize();
+        let code_bytes = result.into_bytes();
+        let hex_string = code_bytes
+            .iter()
+            .map(|byte| format!("{:02x}", byte))
+            .collect::<String>();
+        hex_string
+    }
+
+    /// `verify_hmac_sha256` verify a HMAC-SHA256 hash
+    pub fn verify_hmac_sha256(key: &[u8], message: &str, expected_hmac: &str) -> bool {
+        let generated_hmac = Self::gen_hmac_sha256(key, message);
+        generated_hmac == expected_hmac
+    }
+
+    /// `gen_hmac_blake2b512` encode a HMAC-BLAKE2b-512 hash
+    pub fn gen_hmac_blake2b512(key: &[u8], message: &str) -> String {
+        let mut mac = Blake2bMac512::new_from_slice(key).expect("HMAC can take key of any size");
+        mac.update(message.as_bytes());
+        let result = mac.finalize();
+        let code_bytes = result.into_bytes();
+        let hex_string = code_bytes
+            .iter()
+            .map(|byte| format!("{:02x}", byte))
+            .collect::<String>();
+        hex_string
+    }
+
+    /// `verify_hmac_blake2b512` verify a HMAC-BLAKE2b-512 hash
+    pub fn verify_hmac_blake2b512(key: &[u8], message: &str, expected_hmac: &str) -> bool {
+        let generated_hmac = Self::gen_hmac_blake2b512(key, message);
+        generated_hmac == expected_hmac
+    }
 }
 
 #[test]
@@ -215,4 +255,28 @@ fn hkdf_test() {
         "A0oeefGWqceKVpXoudSQQAf96rxzkSPcPOLpao2eQ3A=",
         result.unwrap()
     );
+}
+
+#[test]
+fn hmac_sha256_test() {
+    let key = b"my secret and secure key";
+    let message = "input message";
+    let expected_hmac = "97d2a569059bbcd8ead4444ff99071f4c01d005bcefe0d3567e1be628e5fdcd9";
+    let generated_hmac = Hash::gen_hmac_sha256(key, message);
+    println!("hmac_sha256: {:?}", generated_hmac);
+    assert_eq!(expected_hmac, generated_hmac);
+    let is_valid = Hash::verify_hmac_sha256(key, message, expected_hmac);
+    assert!(is_valid);
+}
+
+#[test]
+fn hmac_blake2b512_test() {
+    let key = b"my secret and secure key";
+    let message = "input message";
+    let expected_hmac = "5e48e32976b5b2b2900df7d1fd75377b6bae49e3aca630e44e1f3db44981fa4812d2b3a348acf01631a5173c18b55421cb380aa59bf680f1d398c76dc806d411";
+    let generated_hmac = Hash::gen_hmac_blake2b512(key, message);
+    println!("hmac_blake2b512: {:?}", generated_hmac);
+    assert_eq!(expected_hmac, generated_hmac);
+    let is_valid = Hash::verify_hmac_blake2b512(key, message, expected_hmac);
+    assert!(is_valid);
 }
