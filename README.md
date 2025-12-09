@@ -17,6 +17,8 @@ some rust wasm tools
   + MurmurHash3-32
   + MurmurHash3-128
   + hkdf
+  + hmac
+  + ed25519
 
 + otp
   + totp

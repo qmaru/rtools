@@ -2,10 +2,12 @@ use blake2::{Blake2b512, Blake2bMac512, Blake2s256};
 use blake3;
 use data_encoding::BASE64;
 use digest::Digest;
+use ed25519_zebra::{SigningKey, VerificationKey};
 use hkdf::Hkdf;
 use hmac::{Hmac, Mac};
 use md5::Md5;
 use murmur3::{murmur3_32, murmur3_x64_128};
+use rand::thread_rng;
 use sha2::Sha256;
 use sha3::Sha3_256;
 use sm3::Sm3;
@@ -156,6 +158,53 @@ impl Hash {
         let generated_hmac = Self::gen_hmac_blake2b512(key, message);
         generated_hmac == expected_hmac
     }
+
+    /// `gen_ed25519_keypair` generate an Ed25519 keypair (32-byte public key + 32-byte private key)
+    pub fn gen_ed25519_keypair() -> Vec<u8> {
+        let sk = SigningKey::new(thread_rng());
+        let vk = VerificationKey::from(&sk);
+
+        let mut result = Vec::new();
+        let vk_bytes: [u8; 32] = vk.into();
+        result.extend_from_slice(&vk_bytes);
+        result.extend_from_slice(&sk.to_bytes());
+        result
+    }
+
+    /// `gen_ed25519_keypair_b64` generate an Ed25519 keypair in base64
+    pub fn gen_ed25519_keypair_b64() -> String {
+        let result = Self::gen_ed25519_keypair();
+        let vk_b64 = BASE64.encode(&result[..32]);
+        let sk_b64 = BASE64.encode(&result[32..]);
+        format!("{{\"public\":\"{}\",\"private\":\"{}\"}}", vk_b64, sk_b64)
+    }
+
+    /// `gen_ed25519_sign` generate an Ed25519 signature in base64
+    pub fn gen_ed25519_sign(sk_b64: &str, message: &str) -> Option<String> {
+        let sk_vec = BASE64.decode(sk_b64.as_bytes()).ok()?;
+        let sk_bytes: [u8; 32] = sk_vec.try_into().ok()?;
+        let sk = SigningKey::from_bytes(&sk_bytes);
+        let signature = sk.sign(message.as_bytes());
+        Some(BASE64.encode(&signature.to_bytes()))
+    }
+
+    /// `verify_ed25519_sign` verify an Ed25519 signature in base64
+    pub fn verify_ed25519_sign(vk_b64: &str, message: &str, signature_b64: &str) -> Option<bool> {
+        let vk_vec = BASE64.decode(vk_b64.as_bytes()).ok()?;
+        let vk_bytes: [u8; 32] = vk_vec.try_into().ok()?;
+
+        let signature_vec = BASE64.decode(signature_b64.as_bytes()).ok()?;
+        let signature_bytes: [u8; 64] = signature_vec.try_into().ok()?;
+        let signature = ed25519_zebra::Signature::from_bytes(&signature_bytes);
+
+        let msg = message.as_bytes();
+
+        Some(
+            VerificationKey::try_from(vk_bytes)
+                .and_then(|vk| vk.verify(&signature, msg))
+                .is_ok(),
+        )
+    }
 }
 
 #[test]
@@ -279,4 +328,46 @@ fn hmac_blake2b512_test() {
     assert_eq!(expected_hmac, generated_hmac);
     let is_valid = Hash::verify_hmac_blake2b512(key, message, expected_hmac);
     assert!(is_valid);
+}
+
+#[test]
+fn ed25519_pair_test() {
+    let keypair = Hash::gen_ed25519_keypair();
+    assert_eq!(keypair.len(), 32 + 32);
+
+    let vk_slice = &keypair[..32];
+    let sk_slice = &keypair[32..64];
+    println!(
+        "ed25519: public key {:?} len {:?}",
+        vk_slice,
+        vk_slice.len()
+    );
+    println!(
+        "ed25519: private key {:?} len {:?}",
+        sk_slice,
+        sk_slice.len()
+    );
+
+    let keypair_b64 = Hash::gen_ed25519_keypair_b64();
+    println!("ed25519 keypair b64: {:?}", keypair_b64);
+}
+
+#[test]
+fn ed25519_sign_test() {
+    let sk_b64 = "GkPg5ybZfxvN/JTYm+jBvZAYZZnTH/XR6InoIO1JQgY=";
+    let vk_b64 = "6fB6pAmQP19EETYsR+iQc4A7udJ6d1Is+jIU2nx9ci8=";
+    let message = "hello ed25519 signing";
+    let signature_b64_option = Hash::gen_ed25519_sign(&sk_b64, message);
+    assert!(signature_b64_option.is_some());
+    let signature_b64 = signature_b64_option.unwrap();
+    assert_eq!(
+        signature_b64,
+        "ljMcA7Hohls1yqiV5fOlPpQ5jUlyyKve5f1UT1cZ8sefyxTk6O90hmfEZjmhLeBC9QMBS/WdQEKizRTUmNRhDQ=="
+    );
+    println!("ed25519 signature b64: {:?}", signature_b64);
+
+    let verify_b64_option = Hash::verify_ed25519_sign(vk_b64, message, &signature_b64);
+    assert!(verify_b64_option.is_some());
+    let verify_b64 = verify_b64_option.unwrap();
+    assert!(verify_b64);
 }
