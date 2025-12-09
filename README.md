@@ -1,6 +1,6 @@
 # rtools
 
-[![rtools](https://github.com/qmaru/rtools/workflows/wasm/badge.svg)](https://github.com/qmaru/rtools/actions)
+[![rtools](https://github.com/qmaru/rtools/workflows/publish/badge.svg)](https://github.com/qmaru/rtools/actions)
 
 some rust wasm tools
 
