@@ -1,33 +1,51 @@
 # rtools
 
+[![rtools](https://github.com/qmaru/rtools/workflows/wasm/badge.svg)](https://github.com/qmaru/rtools/actions)
+
 some rust wasm tools
 
 ## List
 
-+ hash tools
-  + Blake2b512
-  + Blake2s256
-  + Blake3
-  + Md5
-  + Murmur3_32
-  + Murmur3_x64_128
-  + Sha256
-  + Sha3_256
-  + Sm3
++ hash
+  + MD5
+  + SHA-256
+  + SHA3-256
+  + SM3
+  + BLAKE2s
+  + BLAKE2b
+  + BLAKE3
+  + MurmurHash3-32
+  + MurmurHash3-128
+  + hkdf
 
-+ parse tools
-  + base64
++ otp
+  + totp
+
++ parse
+  + encoding / decoding
+    + base64
+    + base32
+    + punycode
   + sqids
 
-+ password tools
-  + ~~strength~~ (remove from 1.0.11)
++ password
 
 + pinyin
   + han_to_pinyin
+  + han_to_pinyin_with_tone
+
++ qrcode
 
 + random
-  + uuid_v4
+  + uuid
+    + v4
+    + v7
   + nanoid
+  + safebytes
+
++ secret
+  + xchacha
+  + chacha
 
 ## Install
 
