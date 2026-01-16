@@ -7,13 +7,13 @@ repository = "https://github.com/qmaru/rtools"
 license = "GPL-3.0-or-later"
 
 [dependencies]
-wasm-bindgen = "0.2.106"
+wasm-bindgen = "0.2.108"
 digest = { version = "0.10.7", default-features = false }
 sha2 = { version = "0.10.9", default-features = false }
 sha3 = { version = "0.10.8", default-features = false }
 md-5 = { version = "0.10.6", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
-blake3 = { version = "1.8.2", default-features = false }
+blake3 = { version = "1.8.3", default-features = false }
 murmur3 = { version = "0.5.2", default-features = false }
 sm3 = { version = "0.4.2", default-features = false }
 pinyin = { version = "0.10", default-features = false, features = [
@@ -32,7 +32,7 @@ getrandom = { version = "0.2", features = ["js"] }
 otpauth = "0.5.1"
 chacha20poly1305 = "0.10.1"
 hkdf = "0.12.4"
-data-encoding = "2.9.0"
+data-encoding = "2.10.0"
 idna = "1.1.0"
 qrcode = { version = "0.14.1", default-features = false }
 rqrr = { version = "0.10.0", default-features = false }

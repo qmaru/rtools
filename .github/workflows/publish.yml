@@ -22,10 +22,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup wasm-pack
-        uses: qmaru/wasm-pack-action@v0.5.2
+        uses: qmaru/wasm-pack-action@v0.5.3
         with:
           version: latest
 
@@ -46,7 +46,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           registry-url: "https://npm.pkg.github.com"
 
       - name: Publish npm package
