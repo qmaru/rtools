@@ -1,12 +1,22 @@
 use wasm_bindgen::prelude::*;
 
-use data_encoding::BASE64;
+use data_encoding::{BASE64, BASE64_NOPAD, BASE64URL, BASE64URL_NOPAD};
 use rand::{Rng, RngCore, rngs::ThreadRng, seq::SliceRandom, thread_rng};
 
 const UPPERCASE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWERCASE: &str = "abcdefghijklmnopqrstuvwxyz";
 const NUMBER: &str = "0123456789";
 const SYMBOLS: &str = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+#[wasm_bindgen]
+#[derive(Clone, Copy)]
+/// QR code version
+pub enum EncodedingFormat {
+    Base64 = "base64",
+    Base64Nopad = "base64_nopad",
+    Base64Url = "base64_url",
+    Base64UrlNopad = "base64_url_nopad",
+}
 
 #[wasm_bindgen]
 /// `Password` password tools
@@ -56,6 +66,21 @@ impl Password {
         let mut random_bytes_array = vec![0u8; len];
         rand::thread_rng().fill_bytes(&mut random_bytes_array);
         BASE64.encode(&random_bytes_array)
+    }
+
+    /// `get_random_bytes_with_encoding` randomly generate [len] bytes with specified encoding
+    /// Supported formats: ENCODING_BASE64, ENCODING_BASE64_NOPAD, ENCODING_BASE64_URL, ENCODING_BASE64_URL_NOPAD
+    pub fn get_random_bytes_with_encoding(&self, len: usize, encoding: EncodedingFormat) -> String {
+        let mut random_bytes_array = vec![0u8; len];
+        rand::thread_rng().fill_bytes(&mut random_bytes_array);
+
+        match encoding {
+            EncodedingFormat::Base64 => BASE64.encode(&random_bytes_array),
+            EncodedingFormat::Base64Nopad => BASE64_NOPAD.encode(&random_bytes_array),
+            EncodedingFormat::Base64Url => BASE64URL.encode(&random_bytes_array),
+            EncodedingFormat::Base64UrlNopad => BASE64URL_NOPAD.encode(&random_bytes_array),
+            _ => BASE64.encode(&random_bytes_array),
+        }
     }
 
     /// `get_random_password` randomly password
@@ -113,9 +138,10 @@ fn password_random_basic_test() {
     let number = password.get_random_number();
     let symbol = password.get_random_symbol();
     let bytesp = password.get_random_bytes(16);
+    let bytesp2 = password.get_random_bytes_with_encoding(16, EncodedingFormat::Base64UrlNopad);
     println!(
-        "upper: {} lower: {} number: {} symbol: {} bytes: {} ",
-        upper, lower, number, symbol, bytesp
+        "upper: {} lower: {} number: {} symbol: {} bytes: {} bytes_url_nopad: {}",
+        upper, lower, number, symbol, bytesp, bytesp2,
     );
 }
 
