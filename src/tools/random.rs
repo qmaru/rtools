@@ -95,6 +95,16 @@ impl SafeBytes {
         DataEncoding::encode64_nopad_bytes(&self.data)
     }
 
+    /// `to_base64_url` encode to base64 url-safe string
+    pub fn to_base64_url(&self) -> String {
+        DataEncoding::encode64_url_bytes(&self.data)
+    }
+
+    /// `to_base64_url_nopad` encode to base64 url-safe no padding string
+    pub fn to_base64_url_nopad(&self) -> String {
+        DataEncoding::encode64_url_nopad_bytes(&self.data)
+    }
+
     /// `to_hex` encode to hex string
     pub fn to_hex(&self) -> String {
         DataEncoding::encode_hex_bytes(&self.data)

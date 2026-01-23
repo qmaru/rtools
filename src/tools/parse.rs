@@ -1,4 +1,6 @@
-use data_encoding::{BASE32, BASE32_NOPAD, BASE64, BASE64_NOPAD, HEXLOWER};
+use data_encoding::{
+    BASE32, BASE32_NOPAD, BASE64, BASE64_NOPAD, BASE64URL, BASE64URL_NOPAD, HEXLOWER,
+};
 use idna::{domain_to_ascii, domain_to_unicode};
 use sqids::Sqids;
 use wasm_bindgen::prelude::*;
@@ -31,6 +33,30 @@ impl DataEncoding {
         String::from_utf8(bytes).unwrap_or_default()
     }
 
+    /// `encode64_url` encode string to base64 url-safe
+    pub fn encode64_url(content: &str) -> String {
+        BASE64URL.encode(content.as_bytes())
+    }
+
+    /// `decode64_url` decode string from base64 url-safe
+    pub fn decode64_url(content: &str) -> String {
+        let bytes = BASE64URL.decode(content.as_bytes()).unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
+    }
+
+    /// `encode64_url_nopad` encode string to base64 url-safe
+    pub fn encode64_url_nopad(content: &str) -> String {
+        BASE64URL_NOPAD.encode(content.as_bytes())
+    }
+
+    /// `decode64_url_nopad` decode string from base64 url-safe
+    pub fn decode64_url_nopad(content: &str) -> String {
+        let bytes = BASE64URL_NOPAD
+            .decode(content.as_bytes())
+            .unwrap_or_default();
+        String::from_utf8(bytes).unwrap_or_default()
+    }
+
     /// `encode64_bytes` encode bytes to base64
     pub fn encode64_bytes(content: &[u8]) -> String {
         BASE64.encode(content)
@@ -49,6 +75,28 @@ impl DataEncoding {
     /// `decode64_nopad_bytes` decode bytes from base64 no-padding
     pub fn decode64_nopad_bytes(content: &str) -> Vec<u8> {
         BASE64_NOPAD.decode(content.as_bytes()).unwrap_or_default()
+    }
+
+    /// `encode64_url_bytes` encode bytes to base64 url-safe
+    pub fn encode64_url_bytes(content: &[u8]) -> String {
+        BASE64URL.encode(content)
+    }
+
+    /// `decode64_url_bytes` decode bytes from base64 url-safe
+    pub fn decode64_url_bytes(content: &str) -> Vec<u8> {
+        BASE64URL.decode(content.as_bytes()).unwrap_or_default()
+    }
+
+    /// `encode64_url_nopad_bytes` encode bytes to base64 url-safe no-padding
+    pub fn encode64_url_nopad_bytes(content: &[u8]) -> String {
+        BASE64URL_NOPAD.encode(content)
+    }
+
+    /// `decode64_url_nopad_bytes` decode bytes from base64 url-safe no-padding
+    pub fn decode64_url_nopad_bytes(content: &str) -> Vec<u8> {
+        BASE64URL_NOPAD
+            .decode(content.as_bytes())
+            .unwrap_or_default()
     }
 
     /// `encode32` encode string to base32
@@ -215,6 +263,34 @@ fn b64_nopad_encode_test() {
 fn b64_nopad_decode_test() {
     let result = DataEncoding::decode64_nopad("5L2g5aW9LCB3b3JsZA");
     println!("base64 no-padding decode: {:?}", result);
+    assert_eq!("你好, world", result);
+}
+
+#[test]
+fn b64_url_nopad_encode_test() {
+    let result = DataEncoding::encode64_url_nopad("你好, world");
+    println!("base64 url no-padding encode: {:?}", result);
+    assert_eq!("5L2g5aW9LCB3b3JsZA", result);
+}
+
+#[test]
+fn b64_url_nopad_decode_test() {
+    let result = DataEncoding::decode64_url_nopad("5L2g5aW9LCB3b3JsZA");
+    println!("base64 url no-padding decode: {:?}", result);
+    assert_eq!("你好, world", result);
+}
+
+#[test]
+fn b64_url_encode_test() {
+    let result = DataEncoding::encode64_url("你好, world");
+    println!("base64 url encode: {:?}", result);
+    assert_eq!("5L2g5aW9LCB3b3JsZA==", result);
+}
+
+#[test]
+fn b64_url_decode_test() {
+    let result: String = DataEncoding::decode64_url("5L2g5aW9LCB3b3JsZA==");
+    println!("base64 url decode: {:?}", result);
     assert_eq!("你好, world", result);
 }
 
