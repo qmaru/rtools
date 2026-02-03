@@ -47,15 +47,25 @@ impl UUID {
 }
 
 #[wasm_bindgen]
-/// `NanoID` nanoid tools
-pub struct NanoID {}
+pub struct NanoID;
 
 #[wasm_bindgen]
 impl NanoID {
-    /// `nanoid` a tiny, secure, URL-friendly, unique string ID
-    pub fn nanoid(len: usize) -> String {
-        let id = nanoid!(len);
-        id
+    pub fn generate(length: Option<usize>, alphabet: Option<String>) -> String {
+        let len = length.unwrap_or(21);
+
+        match alphabet {
+            Some(a) => {
+                let chars: Vec<char> = a.chars().collect();
+                nanoid!(len, &chars)
+            }
+            None => nanoid!(len),
+        }
+    }
+
+    /// `generate_auto` generation with default settings
+    pub fn generate_auto() -> String {
+        nanoid!()
     }
 }
 
@@ -175,9 +185,12 @@ fn uuid_v7_test() {
 
 #[test]
 fn nanoid_test() {
-    let result = NanoID::nanoid(21);
+    let result = NanoID::generate_auto();
     println!("nanoid: {:?}", result);
-    assert_ne!("", result)
+    let result = NanoID::generate(Some(10), None);
+    println!("nanoid: {:?}", result);
+    let result = NanoID::generate(Some(20), Some("0123456789".to_string()));
+    println!("nanoid: {:?}", result);
 }
 
 #[test]
