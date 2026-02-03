@@ -5,12 +5,90 @@ use idna::{domain_to_ascii, domain_to_unicode};
 use sqids::Sqids;
 use wasm_bindgen::prelude::*;
 
+const BASE62_CHARSET: &[u8; 62] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
 #[wasm_bindgen]
 /// `DataEncoding` Data encoding/decoding tools
 pub struct DataEncoding {}
 
 #[wasm_bindgen]
 impl DataEncoding {
+    /// base62 encode bytes to string
+    pub fn encode62_bytes(content: &[u8]) -> String {
+        if content.is_empty() {
+            return String::new();
+        }
+
+        let mut data = content.to_vec();
+        let mut encoded: Vec<u8> = Vec::new();
+
+        while !data.is_empty() {
+            let mut remainder = 0usize;
+            let mut next: Vec<u8> = Vec::new();
+
+            for &b in &data {
+                let acc = (remainder << 8) + b as usize; // remainder * 256
+                let quo = acc / 62;
+                remainder = acc % 62;
+
+                if !next.is_empty() || quo > 0 {
+                    next.push(quo as u8);
+                }
+            }
+
+            encoded.push(BASE62_CHARSET[remainder]);
+            data = next;
+        }
+
+        encoded.reverse();
+        String::from_utf8(encoded).unwrap_or_default()
+    }
+
+    /// base62 decode string to bytes
+    pub fn decode62_bytes(content: &str) -> Result<Vec<u8>, String> {
+        if content.is_empty() {
+            return Err("input is required".into());
+        }
+
+        let mut index = [255u8; 256];
+        for (i, &b) in BASE62_CHARSET.iter().enumerate() {
+            index[b as usize] = i as u8;
+        }
+
+        let mut result: Vec<u8> = vec![0];
+
+        for &c in content.as_bytes() {
+            let val = index[c as usize];
+            if val == 255 {
+                return Err(format!("invalid base62 character: {}", c as char));
+            }
+
+            let mut carry = val as usize;
+            for byte in &mut result {
+                carry += (*byte as usize) * 62;
+                *byte = (carry & 0xff) as u8;
+                carry >>= 8;
+            }
+
+            while carry > 0 {
+                result.push((carry & 0xff) as u8);
+                carry >>= 8;
+            }
+        }
+
+        result.reverse();
+        Ok(result)
+    }
+
+    pub fn encode62(content: &str) -> String {
+        Self::encode62_bytes(content.as_bytes())
+    }
+
+    pub fn decode62(content: &str) -> Result<String, String> {
+        let bytes = Self::decode62_bytes(content)?;
+        String::from_utf8(bytes).map_err(|_| "invalid utf-8".into())
+    }
+
     /// `encode64` encode string to base64
     pub fn encode64(content: &str) -> String {
         BASE64.encode(content.as_bytes())
@@ -236,6 +314,20 @@ impl SqIDs {
             Err(_) => None,
         }
     }
+}
+
+#[test]
+fn b62_encode_test() {
+    let result = DataEncoding::encode62("你好, world");
+    println!("base62 encode: {:?}", result);
+    assert_eq!("689MCmow67e2VkdcEW", result)
+}
+
+#[test]
+fn b62_decode_test() {
+    let result = DataEncoding::decode62("689MCmow67e2VkdcEW").unwrap_or_default();
+    println!("base62 decode: {:?}", result);
+    assert_eq!("你好, world", result)
 }
 
 #[test]

@@ -75,6 +75,10 @@ impl SafeBytes {
         self.data.clone()
     }
 
+    pub fn to_base62(&self) -> String {
+        DataEncoding::encode62_bytes(&self.data)
+    }
+
     /// `to_base32` encode to base32 string
     pub fn to_base32(&self) -> String {
         DataEncoding::encode32_bytes(&self.data)
@@ -179,8 +183,10 @@ fn nanoid_test() {
 #[test]
 fn safety_test() {
     let result = SafeRandom::gen_bytes(16);
-    println!("safety: {:?}", result.raw());
-    println!("safety: {:?}", result.to_base32());
-    println!("safety: {:?}", result.to_base64());
-    println!("safety: {:?}", result.to_hex());
+    println!("safety raw: {:?}", result.raw());
+    println!("safety base32: {:?}", result.to_base32());
+    println!("safety base62: {:?}", result.to_base62());
+    println!("safety base64: {:?}", result.to_base64());
+    println!("safety base64 nopad: {:?}", result.to_base64_nopad());
+    println!("safety hex: {:?}", result.to_hex());
 }
