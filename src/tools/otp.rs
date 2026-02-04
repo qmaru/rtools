@@ -1,5 +1,4 @@
 use otpauth::TOTP;
-
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -8,12 +7,18 @@ pub struct OTPAuth {}
 
 #[wasm_bindgen]
 impl OTPAuth {
-    /// `generate_code` generate TOTP code
-    pub fn generate_code(secret: &str, timestamp: u64, period: u64) -> u32 {
-        if let Some(totp) = TOTP::from_base32(secret) {
-            totp.generate(period, timestamp)
-        } else {
-            0
+    /// `generate_code` generate TOTP code as 6-digit string
+    pub fn generate_code(secret: &str, timestamp: u64, period: u64) -> String {
+        match TOTP::from_base32(secret) {
+            Some(totp) => {
+                let code = totp.generate(period, timestamp);
+                format!("{:06}", code)
+            }
+            None => {
+                #[cfg(debug_assertions)]
+                eprintln!("Failed to parse Base32 secret: {}", secret);
+                "000000".to_string()
+            }
         }
     }
 }
@@ -30,5 +35,5 @@ fn totp_test() {
     let secret = input.replace(" ", "").to_uppercase();
     let result = OTPAuth::generate_code(&secret, timestamp, 30);
     println!("totp: {:?}", result);
-    assert_ne!(0, result)
+    assert_ne!("000000", result);
 }
