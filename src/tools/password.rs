@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::*;
 const UPPERCASE: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWERCASE: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
 const NUMBER: &[u8] = b"0123456789";
-const SYMBOLS: &[u8] = b"!@#-_";
+const SYMBOLS: &[u8] = b"!@#$%^&*()-_+=";
 
 #[wasm_bindgen]
 pub struct Password {
