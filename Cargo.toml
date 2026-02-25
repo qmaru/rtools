@@ -1,13 +1,13 @@
 [package]
 name = "rtools"
-version = "1.4.0"
+version = "1.4.1"
 edition = "2024"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
 license = "GPL-3.0-or-later"
 
 [dependencies]
-wasm-bindgen = "0.2.108"
+wasm-bindgen = "0.2.113"
 digest = { version = "0.10.7", default-features = false }
 sha2 = { version = "0.10.9", default-features = false }
 sha3 = { version = "0.10.8", default-features = false }
@@ -20,7 +20,7 @@ pinyin = { version = "0.10", default-features = false, features = [
     "plain",
     "with_tone",
 ] }
-uuid = { version = "1.20.0", default-features = false, features = [
+uuid = { version = "1.21.0", default-features = false, features = [
     "v4",
     "v7",
     "js",
@@ -40,6 +40,7 @@ hmac = { version = "0.12.1", default-features = false }
 ed25519-zebra = { version = "4.1.0", default-features = false, features = [
     "alloc",
 ] }
+phraze = { version = "0.3.25", default-features = false }
 
 [lib]
 crate-type = ["cdylib"]
