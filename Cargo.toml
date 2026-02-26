@@ -40,7 +40,6 @@ hmac = { version = "0.12.1", default-features = false }
 ed25519-zebra = { version = "4.1.0", default-features = false, features = [
     "alloc",
 ] }
-phraze = { version = "0.3.25", default-features = false }
 
 [lib]
 crate-type = ["cdylib"]
