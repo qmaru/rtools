@@ -1,3 +1,4 @@
+use bcrypt::{Version, hash_with_result};
 use rand::rngs::ThreadRng;
 use rand::seq::{IndexedRandom, SliceRandom};
 use wasm_bindgen::prelude::*;
@@ -68,6 +69,25 @@ impl Password {
     }
 }
 
+#[wasm_bindgen]
+/// `Htpasswd` bcrypt htpasswd tools
+pub struct Htpasswd {}
+
+#[wasm_bindgen]
+impl Htpasswd {
+    /// `generate` creates a bcrypt htpasswd entry
+    pub fn generate(username: &str, password: &str, cost: u32) -> String {
+        if username.is_empty() || username.contains([':', '\r', '\n']) {
+            return String::new();
+        }
+
+        match hash_with_result(password, cost) {
+            Ok(parts) => format!("{}:{}", username, parts.format_for_version(Version::TwoY)),
+            Err(_) => String::new(),
+        }
+    }
+}
+
 #[test]
 fn password_random_basic_test() {
     let mut password = Password::new();
@@ -75,4 +95,15 @@ fn password_random_basic_test() {
     let rpass = password.get_random_password(true, true, true, true, len);
     println!("random password: {}", rpass);
     assert_eq!(rpass.len(), len);
+}
+
+#[test]
+fn htpasswd_generate_test() {
+    let result = Htpasswd::generate("admin", "secret", 4);
+    let (username, hash) = result.split_once(':').expect("valid htpasswd entry");
+
+    assert_eq!(username, "admin");
+    assert!(hash.starts_with("$2y$04$"));
+    assert_eq!(hash.len(), 60);
+    assert!(bcrypt::verify("secret", hash).unwrap());
 }

@@ -28,6 +28,7 @@ Below is a concise, function-first feature map (exports are `pub` methods on was
 
 - **password** 🔑
   - `Password` struct (stateful; holds `OsRng`) with `get_random_password(...)`
+  - `Htpasswd::generate(username, password, cost)` — generates a bcrypt `.htpasswd` entry
 
 - **pinyin** 🀄
   - `Pinyin::han_to_pinyin`, `han_to_pinyin_with_tone`
