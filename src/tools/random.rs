@@ -1,6 +1,6 @@
 use crate::tools::parse::DataEncoding;
 use String;
-use getrandom::getrandom;
+use getrandom::fill;
 use nanoid::nanoid;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
@@ -130,7 +130,7 @@ impl SafeRandom {
     /// `gen_bytes` generate a safety bytes
     pub fn gen_bytes(len: usize) -> SafeBytes {
         let mut buf = vec![0u8; len];
-        getrandom(&mut buf).expect("Failed to generate random bytes");
+        fill(&mut buf).expect("Failed to generate random bytes");
         SafeBytes { data: buf }
     }
 

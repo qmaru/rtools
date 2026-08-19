@@ -7,7 +7,7 @@ use hkdf::Hkdf;
 use hmac::{Hmac, Mac};
 use md5::Md5;
 use murmur3::{murmur3_32, murmur3_x64_128};
-use rand::thread_rng;
+use getrandom::fill;
 use sha2::Sha256;
 use sha3::Sha3_256;
 use sm3::Sm3;
@@ -161,7 +161,9 @@ impl Hash {
 
     /// `gen_ed25519_keypair` generate an Ed25519 keypair (32-byte public key + 32-byte private key)
     pub fn gen_ed25519_keypair() -> Vec<u8> {
-        let sk = SigningKey::new(thread_rng());
+        let mut sk_bytes = [0u8; 32];
+        fill(&mut sk_bytes).expect("Failed to generate Ed25519 private key material");
+        let sk = SigningKey::from_bytes(&sk_bytes);
         let vk = VerificationKey::from(&sk);
 
         let mut result = Vec::new();

@@ -1,5 +1,5 @@
-use rand::rngs::OsRng;
-use rand::seq::SliceRandom;
+use rand::rngs::ThreadRng;
+use rand::seq::{IndexedRandom, SliceRandom};
 use wasm_bindgen::prelude::*;
 
 const UPPERCASE: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -9,13 +9,13 @@ const SYMBOLS: &[u8] = b"!@#$%^&*()-_+=";
 
 #[wasm_bindgen]
 pub struct Password {
-    rng: OsRng,
+    rng: ThreadRng,
 }
 
 #[wasm_bindgen]
 impl Password {
     pub fn new() -> Self {
-        Self { rng: OsRng }
+        Self { rng: rand::rng() }
     }
 
     fn pick(&mut self, set: &[u8]) -> u8 {

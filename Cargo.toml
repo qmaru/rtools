@@ -1,45 +1,37 @@
 [package]
 name = "rtools"
-version = "1.4.2"
+version = "1.5.0"
 edition = "2024"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
 license = "GPL-3.0-or-later"
 
 [dependencies]
-wasm-bindgen = "0.2.126"
+wasm-bindgen = "0.2.127"
 digest = { version = "0.10.7", default-features = false }
 sha2 = { version = "0.10.9", default-features = false }
 sha3 = { version = "0.10.9", default-features = false }
 md-5 = { version = "0.10.6", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
-blake3 = { version = "1.8.5", default-features = false }
+blake3 = { version = "1.8.6", default-features = false }
 murmur3 = { version = "0.5.2", default-features = false }
 sm3 = { version = "0.4.2", default-features = false }
-pinyin = { version = "0.10", default-features = false, features = [
-    "plain",
-    "with_tone",
-] }
-uuid = { version = "1.23.5", default-features = false, features = [
-    "v4",
-    "v7",
-    "js",
-] }
-nanoid = { version = "0.4.0", default-features = false }
+bcrypt = { version = "0.19.3", default-features = false, features = ["alloc", "getrandom"] }
+pinyin = { version = "0.10", default-features = false, features = ["plain", "with_tone"] }
+uuid = { version = "1.24.1", default-features = false, features = ["v4", "v7", "js"] }
+nanoid = { git = "https://github.com/qmaru/nanoid", default-features = false }
 sqids = { version = "0.4.2", default-features = false }
-rand = { version = "0.8.7", default-features = false }
-getrandom = { version = "0.2", features = ["js"] }
-otpauth = "0.5.1"
-chacha20poly1305 = "0.10.1"
+rand = { version = "0.10.2", default-features = false, features = ["thread_rng"] }
+getrandom = { version = "0.4.3", default-features = false, features = ["wasm_js"] }
+otpauth = { git = "https://github.com/qmaru/otpauth-rs.git" }
+chacha20poly1305 = "0.11.0"
 hkdf = "0.12.4"
-data-encoding = "2.11.0"
+data-encoding = "2.11.1"
 idna = "1.1.0"
 qrcode = { version = "0.14.1", default-features = false }
 rqrr = { version = "0.10.1", default-features = false }
 hmac = { version = "0.12.1", default-features = false }
-ed25519-zebra = { version = "4.2.0", default-features = false, features = [
-    "alloc",
-] }
+ed25519-zebra = { version = "4.2.0", default-features = false, features = ["alloc"] }
 
 [lib]
 crate-type = ["cdylib"]
