@@ -1,6 +1,6 @@
 [package]
 name = "rtools"
-version = "1.5.4"
+version = "1.5.5"
 edition = "2024"
 description = "wasm tools"
 repository = "https://github.com/qmaru/rtools"
@@ -18,7 +18,7 @@ murmur3 = { version = "0.5.2", default-features = false }
 sm3 = { version = "0.4.2", default-features = false }
 bcrypt = { version = "0.19.3", default-features = false, features = ["alloc", "getrandom"] }
 pinyin = { version = "0.10", default-features = false, features = ["plain", "with_tone"] }
-uuid = { version = "1.27.0", default-features = false, features = ["v4", "v7", "js"] }
+uuid = { version = "1.29.0", default-features = false, features = ["v4", "v7", "js"] }
 nanoid = { git = "https://github.com/qmaru/nanoid", default-features = false }
 sqids = { version = "0.4.2", default-features = false }
 rand = { version = "0.10.3", default-features = false, features = ["thread_rng"] }
